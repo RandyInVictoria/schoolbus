@@ -1,0 +1,32 @@
+.file-upload {
+  display: inline-block;
+
+  input[type="file"] {
+    display: none;
+  }
+
+  label {
+    display: inline-block;
+  }
+
+  .progress {
+    width: 100px;
+  }
+
+  .file-upload-error-message {
+    color: #9A133E;
+    position: relative;
+    cursor: pointer;
+    padding-right: 20px;
+
+    .glyphicon-remove {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+      position: absolute;
+      top: 50%;
+      right: 0;
+      margin-top: -8px;
+    }
+  }
+}

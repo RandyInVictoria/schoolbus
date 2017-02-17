@@ -23,6 +23,7 @@ import Confirm from '../components/Confirm.jsx';
 import OverlayTrigger from '../components/OverlayTrigger.jsx';
 import SortTable from '../components/SortTable.jsx';
 import Spinner from '../components/Spinner.jsx';
+import FileUpload from '../components/FileUpload.jsx';
 
 import { formatDateTime } from '../utils/date';
 import { plural } from '../utils/string';
@@ -232,6 +233,9 @@ var OwnersDetail = React.createClass({
           <Col md={6}>
             <Well>
               <h3>Comment Log</h3>
+              <div style={{textAlign:'right'}}>
+                <FileUpload/>
+              </div>
               {(() => {
                 if (this.state.loading ) { return <div style={{ textAlign: 'center' }}><Spinner/></div>; }
                 if (!owner.notes || owner.notes.length === 0) { return <Alert bsStyle="success" style={{ marginTop: 10 }}>No comments</Alert>; }
