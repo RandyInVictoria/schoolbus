@@ -23,7 +23,8 @@ import Confirm from '../components/Confirm.jsx';
 import OverlayTrigger from '../components/OverlayTrigger.jsx';
 import SortTable from '../components/SortTable.jsx';
 import Spinner from '../components/Spinner.jsx';
-import FileUpload from '../components/FileUpload.jsx';
+// import FileUpload from '../components/FileUpload.jsx';
+import FileAttachDialog from '../components/FileAttachDialog.jsx';
 
 import { formatDateTime } from '../utils/date';
 import { plural } from '../utils/string';
@@ -234,7 +235,11 @@ var OwnersDetail = React.createClass({
             <Well>
               <h3>Comment Log</h3>
               <div style={{textAlign:'right'}}>
-                <FileUpload/>
+                {/*<FileUpload/>*/}
+                <Button onClick={() => { this.setState({ showFileUploadDailog:true }); }}>
+                  Attach Files
+                </Button>
+                { this.state.showFileUploadDailog && <FileAttachDialog attachToName={`Owner ${owner.name}`} onClose={() => { this.setState({ showFileUploadDailog:false }); }} />}
               </div>
               {(() => {
                 if (this.state.loading ) { return <div style={{ textAlign: 'center' }}><Spinner/></div>; }
