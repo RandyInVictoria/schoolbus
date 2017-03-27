@@ -38,7 +38,7 @@ app.post('/api/test-file-upload', function(req, res) {
       setTimeout(function() {res.end();}, 2 * 1000);
     } else {
       console.log('failed upload');
-      res.status(400).end();
+      res.status(400).send('upload failed').end();
     }
   });
 });

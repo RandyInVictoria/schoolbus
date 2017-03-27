@@ -22,7 +22,7 @@ import BadgeLabel from '../components/BadgeLabel.jsx';
 import ColDisplay from '../components/ColDisplay.jsx';
 import DeleteButton from '../components/DeleteButton.jsx';
 import EditButton from '../components/EditButton.jsx';
-import FileUpload from '../components/FileUpload.jsx';
+import FileAttachDialog from '../components/FileAttachDialog.jsx';
 import SortTable from '../components/SortTable.jsx';
 import Spinner from '../components/Spinner.jsx';
 import Unimplemented from '../components/Unimplemented.jsx';
@@ -267,7 +267,11 @@ var OwnersDetail = React.createClass({
             <Well>
               <h3>Comment Log</h3>
               <div style={{textAlign:'right'}}>
-                <FileUpload/>
+                {/*<FileUpload/>*/}
+                <Button onClick={() => { this.setState({ showFileUploadDailog:true }); }}>
+                  Attach Files
+                </Button>
+                { this.state.showFileUploadDailog && <FileAttachDialog attachToName={`Owner ${owner.name}`} onClose={() => { this.setState({ showFileUploadDailog:false }); }} />}
               </div>
               {(() => {
                 if (this.state.loading ) { return <div style={{ textAlign: 'center' }}><Spinner/></div>; }

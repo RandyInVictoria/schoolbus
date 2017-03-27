@@ -1,4 +1,4 @@
-.file-upload {
+.file-picker {
   display: inline-block;
 
   input[type="file"] {
@@ -7,8 +7,11 @@
 
   label {
     display: inline-block;
+    margin-bottom: 0;
   }
+}
 
+.file-upload {
   .progress {
     width: 100px;
   }
@@ -27,6 +30,43 @@
       top: 50%;
       right: 0;
       margin-top: -8px;
+    }
+  }
+}
+
+.file-upload-dialog {
+  .note {
+    text-align: center;
+  }
+
+  ol.file-list {
+    border-bottom: 1px solid #EEE;
+    margin: 0 0 20px 0;
+    padding: 0 0 15px 0;
+    list-style: none;
+
+    li {
+      padding: 5px 15px;
+      margin: 0 -15px;
+
+      &:hover {
+        background-color: #EEE;
+      }
+
+      .glyphicon {
+        float: right;
+        cursor: pointer;
+
+        &:hover {
+          color: #9E0A0A;
+        }
+      }
+    }
+  }
+
+  .modal-footer {
+    .file-upload {
+      float: right;
     }
   }
 }
