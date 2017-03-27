@@ -42,10 +42,10 @@ namespace SchoolBusAPI.Seeders
             foreach (var user in seedUsers)
             {
                 context.UpdateSeedUserInfo(user);
+                context.SaveChanges();
             }
 
-            AddInitialUsers(context);
-            context.SaveChanges();
+            AddInitialUsers(context);            
         }
 
         private void AddInitialUsers(DbAppContext context)
@@ -103,7 +103,7 @@ namespace SchoolBusAPI.Seeders
                     {
                         new UserRole
                         {
-                            EffectiveDate = DateTime.Now,
+                            EffectiveDate = DateTime.UtcNow,
                             Role = context.GetRole("User")
                         }
                     }

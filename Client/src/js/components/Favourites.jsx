@@ -8,10 +8,10 @@ import _ from 'lodash';
 import * as Api from '../api';
 
 import CheckboxControl from '../components/CheckboxControl.jsx';
-import Confirm from '../components/Confirm.jsx';
+import DeleteButton from '../components/DeleteButton.jsx';
+import EditButton from '../components/EditButton.jsx';
 import EditDialog from '../components/EditDialog.jsx';
 import FormInputControl from '../components/FormInputControl.jsx';
-import OverlayTrigger from '../components/OverlayTrigger.jsx';
 import RootCloseMenu from './RootCloseMenu.jsx';
 
 import { isBlank } from '../utils/string';
@@ -101,6 +101,7 @@ var Favourites = React.createClass({
       favourites: this.props.favourites,
       favouriteToEdit: {},
       showEditDialog: false,
+      open: false,
     };
   },
 
@@ -149,6 +150,7 @@ var Favourites = React.createClass({
   },
 
   selectFavourite(favourite) {
+    this.toggle(false);
     this.props.onSelect(favourite);
   },
 
@@ -160,9 +162,15 @@ var Favourites = React.createClass({
     this.setState({ showEditDialog: false });
   },
 
+  toggle(open) {
+    this.setState({ open: open });
+  },
+
   render() {
-    var title = this.props.title || 'Faves';
-    return <Dropdown id={ this.props.id } className={ `favourites ${ this.props.className || '' }` } title={ title }  pullRight={ this.props.pullRight }>
+    var title = this.props.title || 'Favourites';
+    return <Dropdown id={ this.props.id } className={ `favourites ${ this.props.className || '' }` } title={ title } pullRight={ this.props.pullRight }
+      open={ this.state.open } onToggle={ this.toggle }
+    >
       <Dropdown.Toggle>{ title }</Dropdown.Toggle>
       <RootCloseMenu bsRole="menu">
         <div className="favourites-button-bar">
@@ -183,10 +191,8 @@ var Favourites = React.createClass({
                   </Col>
                   <Col md={3}>
                     <ButtonToolbar>
-                      <Button bsSize="xsmall" onClick={ this.editFavourite.bind(this, favourite) }><Glyphicon glyph="edit" /></Button>
-                      <OverlayTrigger trigger="click" placement="top" rootClose overlay={ <Confirm onConfirm={ this.deleteFavourite.bind(this, favourite) }/> }>
-                        <Button bsSize="xsmall"><Glyphicon glyph="remove" /></Button>
-                      </OverlayTrigger>
+                      <DeleteButton name="Favourite" onConfirm={ this.deleteFavourite.bind(this, favourite) }/>
+                      <EditButton name="Favourite" onClick={ this.editFavourite.bind(this, favourite) }/>
                     </ButtonToolbar>
                   </Col>
                 </li>;

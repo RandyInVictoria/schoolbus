@@ -19,6 +19,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using SchoolBusAPI.Models;
 
 namespace SchoolBusAPI.Models
 {
@@ -27,7 +28,7 @@ namespace SchoolBusAPI.Models
     /// </summary>
         [MetaDataExtension (Description = "School Bus inspection details supplementary to the RIP inspection")]
 
-    public partial class Inspection : IEquatable<Inspection>
+    public partial class Inspection : AuditableEntity, IEquatable<Inspection>
     {
         /// <summary>
         /// Default constructor, required by entity framework
@@ -45,11 +46,13 @@ namespace SchoolBusAPI.Models
         /// <param name="InspectionTypeCode">The type of the inspection - enumerated type of Annual or Re-inspection,  pulled from the School Bus record at the time the inspection record is created (required).</param>
         /// <param name="InspectionResultCode">The result of the inspection - enumerated type of Passed or Failed. The detailed results of the inspection are in RIP and not duplicated here. (required).</param>
         /// <param name="CreatedDate">Record creation date and time (required).</param>
-        /// <param name="SchoolBus">SchoolBus.</param>
+        /// <param name="SchoolBus">A foreign key reference to the system-generated unique identifier for a School Bus.</param>
         /// <param name="Inspector">Defaults for a new inspection to the current user,  but can be changed as needed..</param>
         /// <param name="Notes">A note about the inspection independent of what goes into the RIP inspection - this is just for the School Bus application..</param>
         /// <param name="RIPInspectionId">The ID of the RIP inspection. The expectation is that the user will manually enter a RIP ID such that an external URL can be formed to allow the user to open the RIP inspection and see the inspection details..</param>
-        public Inspection(int Id, DateTime InspectionDate, string InspectionTypeCode, string InspectionResultCode, DateTime CreatedDate, SchoolBus SchoolBus = null, User Inspector = null, string Notes = null, string RIPInspectionId = null)
+        /// <param name="PreviousNextInspectionDate">The next inspection date for the related School Bus prior to the creation of this record.</param>
+        /// <param name="PreviousNextInspectionTypeCode">The next inspection type code for the related School Bus prior to the creation of this record.</param>
+        public Inspection(int Id, DateTime InspectionDate, string InspectionTypeCode, string InspectionResultCode, DateTime CreatedDate, SchoolBus SchoolBus = null, User Inspector = null, string Notes = null, string RIPInspectionId = null, DateTime? PreviousNextInspectionDate = null, string PreviousNextInspectionTypeCode = null)
         {   
             this.Id = Id;
             this.InspectionDate = InspectionDate;
@@ -64,6 +67,8 @@ namespace SchoolBusAPI.Models
             this.Inspector = Inspector;
             this.Notes = Notes;
             this.RIPInspectionId = RIPInspectionId;
+            this.PreviousNextInspectionDate = PreviousNextInspectionDate;
+            this.PreviousNextInspectionTypeCode = PreviousNextInspectionTypeCode;
         }
 
         /// <summary>
@@ -106,15 +111,19 @@ namespace SchoolBusAPI.Models
         public DateTime CreatedDate { get; set; }
         
         /// <summary>
-        /// Gets or Sets SchoolBus
+        /// A foreign key reference to the system-generated unique identifier for a School Bus
         /// </summary>
+        /// <value>A foreign key reference to the system-generated unique identifier for a School Bus</value>
+        [MetaDataExtension (Description = "A foreign key reference to the system-generated unique identifier for a School Bus")]
         public SchoolBus SchoolBus { get; set; }
         
         /// <summary>
         /// Foreign key for SchoolBus 
-        /// </summary>       
+        /// </summary>   
         [ForeignKey("SchoolBus")]
-        public int? SchoolBusRefId { get; set; }
+		[JsonIgnore]
+		[MetaDataExtension (Description = "A foreign key reference to the system-generated unique identifier for a School Bus")]
+        public int? SchoolBusId { get; set; }
         
         /// <summary>
         /// Defaults for a new inspection to the current user,  but can be changed as needed.
@@ -125,9 +134,11 @@ namespace SchoolBusAPI.Models
         
         /// <summary>
         /// Foreign key for Inspector 
-        /// </summary>       
+        /// </summary>   
         [ForeignKey("Inspector")]
-        public int? InspectorRefId { get; set; }
+		[JsonIgnore]
+		[MetaDataExtension (Description = "Defaults for a new inspection to the current user,  but can be changed as needed.")]
+        public int? InspectorId { get; set; }
         
         /// <summary>
         /// A note about the inspection independent of what goes into the RIP inspection - this is just for the School Bus application.
@@ -148,6 +159,22 @@ namespace SchoolBusAPI.Models
         public string RIPInspectionId { get; set; }
         
         /// <summary>
+        /// The next inspection date for the related School Bus prior to the creation of this record
+        /// </summary>
+        /// <value>The next inspection date for the related School Bus prior to the creation of this record</value>
+        [MetaDataExtension (Description = "The next inspection date for the related School Bus prior to the creation of this record")]
+        public DateTime? PreviousNextInspectionDate { get; set; }
+        
+        /// <summary>
+        /// The next inspection type code for the related School Bus prior to the creation of this record
+        /// </summary>
+        /// <value>The next inspection type code for the related School Bus prior to the creation of this record</value>
+        [MetaDataExtension (Description = "The next inspection type code for the related School Bus prior to the creation of this record")]
+        [MaxLength(30)]
+        
+        public string PreviousNextInspectionTypeCode { get; set; }
+        
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -164,6 +191,8 @@ namespace SchoolBusAPI.Models
             sb.Append("  Inspector: ").Append(Inspector).Append("\n");
             sb.Append("  Notes: ").Append(Notes).Append("\n");
             sb.Append("  RIPInspectionId: ").Append(RIPInspectionId).Append("\n");
+            sb.Append("  PreviousNextInspectionDate: ").Append(PreviousNextInspectionDate).Append("\n");
+            sb.Append("  PreviousNextInspectionTypeCode: ").Append(PreviousNextInspectionTypeCode).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -245,6 +274,16 @@ namespace SchoolBusAPI.Models
                     this.RIPInspectionId == other.RIPInspectionId ||
                     this.RIPInspectionId != null &&
                     this.RIPInspectionId.Equals(other.RIPInspectionId)
+                ) &&                 
+                (
+                    this.PreviousNextInspectionDate == other.PreviousNextInspectionDate ||
+                    this.PreviousNextInspectionDate != null &&
+                    this.PreviousNextInspectionDate.Equals(other.PreviousNextInspectionDate)
+                ) &&                 
+                (
+                    this.PreviousNextInspectionTypeCode == other.PreviousNextInspectionTypeCode ||
+                    this.PreviousNextInspectionTypeCode != null &&
+                    this.PreviousNextInspectionTypeCode.Equals(other.PreviousNextInspectionTypeCode)
                 );
         }
 
@@ -291,6 +330,14 @@ namespace SchoolBusAPI.Models
                                 if (this.RIPInspectionId != null)
                 {
                     hash = hash * 59 + this.RIPInspectionId.GetHashCode();
+                }                
+                                if (this.PreviousNextInspectionDate != null)
+                {
+                    hash = hash * 59 + this.PreviousNextInspectionDate.GetHashCode();
+                }                
+                                if (this.PreviousNextInspectionTypeCode != null)
+                {
+                    hash = hash * 59 + this.PreviousNextInspectionTypeCode.GetHashCode();
                 }                
                 
                 return hash;

@@ -20,23 +20,32 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SchoolBusAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using SchoolBusAPI.Mappings;
+using SchoolBusAPI.ViewModels;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Http;
+using System.Net.Http;
+using System.Text;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace SchoolBusAPI.Services.Impl
 { 
     /// <summary>
     /// 
     /// </summary>
-    public class SchoolBusService : ISchoolBusService
+    public class SchoolBusService : ServiceBase, ISchoolBusService
     {
 
         private readonly DbAppContext _context;
+        private readonly IConfiguration Configuration;
 
         /// <summary>
         /// Create a service and set the database context
         /// </summary>
-        public SchoolBusService (DbAppContext context)
+        public SchoolBusService(IHttpContextAccessor httpContextAccessor, IConfiguration configuration, DbAppContext context) : base(httpContextAccessor, context)
         {
             _context = context;
+            Configuration = configuration;
         }
 	
         /// <summary>
@@ -45,86 +54,109 @@ namespace SchoolBusAPI.Services.Impl
         /// <param name="item"></param>
         private void AdjustSchoolBus(SchoolBus item)
         {
-            if (item.SchoolBusOwner != null)
+            if (item != null)
             {
-                int school_bus_owner_id = item.SchoolBusOwner.Id;
-                bool school_bus_owner_exists = _context.SchoolBusOwners.Any(a => a.Id == school_bus_owner_id);
-                if (school_bus_owner_exists)
-                {
-                    SchoolBusOwner school_bus_owner = _context.SchoolBusOwners.First(a => a.Id == school_bus_owner_id);
-                    item.SchoolBusOwner = school_bus_owner;
-                }
-                else // invalid data
-                {
-                    item.SchoolBusOwner = null;
-                }
-            }
 
-            // adjust District.
-            if (item.District != null)
-            {
-                int district_id = item.District.Id;
-                var district_exists = _context.ServiceAreas.Any(a => a.Id == district_id);
-                if (district_exists)
-                {
-                    District district = _context.Districts.First(a => a.Id == district_id);
-                    item.District = district;
-                }
-                else
-                {
-                    item.District = null;
-                }
-            }                // adjust school district
 
-            if (item.SchoolDistrict != null)
-            {
-                int schoolDistrict_id = item.SchoolDistrict.Id;
-                bool schoolDistrict_exists = _context.SchoolDistricts.Any(a => a.Id == schoolDistrict_id);
-                if (schoolDistrict_exists)
+                if (item.SchoolBusOwner != null)
                 {
-                    SchoolDistrict school_district = _context.SchoolDistricts.First(a => a.Id == schoolDistrict_id);
-                    item.SchoolDistrict = school_district;
+                    int school_bus_owner_id = item.SchoolBusOwner.Id;
+                    bool school_bus_owner_exists = _context.SchoolBusOwners.Any(a => a.Id == school_bus_owner_id);
+                    if (school_bus_owner_exists)
+                    {
+                        SchoolBusOwner school_bus_owner = _context.SchoolBusOwners.First(a => a.Id == school_bus_owner_id);
+                        item.SchoolBusOwner = school_bus_owner;
+                    }
+                    else // invalid data
+                    {
+                        item.SchoolBusOwner = null;
+                    }
                 }
-                else
-                // invalid data
-                {
-                    item.SchoolDistrict = null;
-                }
-            }
 
-            // adjust home city
+                // adjust District.
+                if (item.District != null)
+                {
+                    int district_id = item.District.Id;
+                    var district_exists = _context.Districts.Any(a => a.Id == district_id);
+                    if (district_exists)
+                    {
+                        District district = _context.Districts.First(a => a.Id == district_id);
+                        item.District = district;
+                    }
+                    else
+                    {
+                        item.District = null;
+                    }
+                }                // adjust school district
 
-            if (item.HomeTerminalCity != null)
-            {
-                int city_id = item.HomeTerminalCity.Id;
-                bool city_exists = _context.Cities.Any(a => a.Id == city_id);
-                if (city_exists)
+                if (item.SchoolDistrict != null)
                 {
-                    City city = _context.Cities.First(a => a.Id == city_id);
-                    item.HomeTerminalCity = city;
+                    int schoolDistrict_id = item.SchoolDistrict.Id;
+                    bool schoolDistrict_exists = _context.SchoolDistricts.Any(a => a.Id == schoolDistrict_id);
+                    if (schoolDistrict_exists)
+                    {
+                        SchoolDistrict school_district = _context.SchoolDistricts.First(a => a.Id == schoolDistrict_id);
+                        item.SchoolDistrict = school_district;
+                    }
+                    else
+                    // invalid data
+                    {
+                        item.SchoolDistrict = null;
+                    }
                 }
-                else
-                // invalid data
-                {
-                    item.HomeTerminalCity = null;
-                }
-            }
 
-            // adjust inspector
+                // adjust home city
 
-            if (item.Inspector != null)
-            {
-                int inspector_id = item.Inspector.Id;
-                bool inspector_exists = _context.Users.Any(a => a.Id == inspector_id);
-                if (inspector_exists)
+                if (item.HomeTerminalCity != null)
                 {
-                    User inspector = _context.Users.First(a => a.Id == inspector_id);
-                    item.Inspector = inspector;
+                    int city_id = item.HomeTerminalCity.Id;
+                    bool city_exists = _context.Cities.Any(a => a.Id == city_id);
+                    if (city_exists)
+                    {
+                        City city = _context.Cities.First(a => a.Id == city_id);
+                        item.HomeTerminalCity = city;
+                    }
+                    else
+                    // invalid data
+                    {
+                        item.HomeTerminalCity = null;
+                    }
                 }
-                else
-                // invalid data
+
+                // adjust inspector
+
+                if (item.Inspector != null)
                 {
-                    item.Inspector = null;
+                    int inspector_id = item.Inspector.Id;
+                    bool inspector_exists = _context.Users.Any(a => a.Id == inspector_id);
+                    if (inspector_exists)
+                    {
+                        User inspector = _context.Users.First(a => a.Id == inspector_id);
+                        item.Inspector = inspector;
+                    }
+                    else
+                    // invalid data
+                    {
+                        item.Inspector = null;
+                    }
+                }
+
+                // adjust CCWData
+
+                if (item.CCWData != null)
+                {
+                    int ccwdata_id = item.CCWData.Id;
+                    bool ccwdata_exists = _context.CCWDatas.Any(a => a.Id == ccwdata_id);
+                    if (ccwdata_exists)
+                    {
+                        CCWData ccwdata = _context.CCWDatas.First(a => a.Id == ccwdata_id);
+                        item.CCWData = ccwdata;
+                    }
+                    else
+                    // invalid data
+                    {
+                        item.CCWData = null;
+                    }
                 }
             }
         }
@@ -181,6 +213,7 @@ namespace SchoolBusAPI.Services.Impl
                     .Include(x => x.SchoolBusOwner.PrimaryContact)
                     .Include(x => x.District.Region)
                     .Include(x => x.Inspector)
+                    .Include(x => x.CCWData)
                     .First(a => a.Id == id);
                 return new ObjectResult(result);
             }
@@ -203,6 +236,7 @@ namespace SchoolBusAPI.Services.Impl
                 .Include(x => x.SchoolBusOwner.PrimaryContact)
                 .Include(x => x.District.Region)
                 .Include(x => x.Inspector)
+                .Include(x => x.CCWData)
                 .ToList();
             return new ObjectResult(result);
         }
@@ -222,7 +256,7 @@ namespace SchoolBusAPI.Services.Impl
                 SchoolBus schoolBus = _context.SchoolBuss
                     .Include(x => x.Attachments)
                     .First(a => a.Id == id);
-                var result = schoolBus.Attachments;
+                var result = MappingExtensions.GetAttachmentListAsViewModel(schoolBus.Attachments); 
                 return new ObjectResult(result);
             }
             else
@@ -232,6 +266,8 @@ namespace SchoolBusAPI.Services.Impl
             }
 
         }
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -306,15 +342,32 @@ namespace SchoolBusAPI.Services.Impl
         /// <param name="id">id of SchoolBus to fetch SchoolBusHistory for</param>
         /// <response code="200">OK</response>
 
-        public virtual IActionResult SchoolbusesIdHistoryGetAsync (int id)        
+        public virtual IActionResult SchoolbusesIdHistoryGetAsync (int id, int? offset, int? limit)        
         {
             bool exists = _context.SchoolBuss.Any(a => a.Id == id);
             if (exists)
             {
                 SchoolBus schoolBus = _context.SchoolBuss
-                    .Include(x => x.History)
+                    .Include(x => x.History)                    
                     .First(a => a.Id == id);
-                var result = schoolBus.History;
+                
+                List<History> data = schoolBus.History.OrderByDescending(y => y.LastUpdateTimestamp).ToList();
+
+                if (offset == null)
+                {
+                    offset = 0;
+                }
+                if (limit == null)
+                {
+                    limit = data.Count() - offset;
+                }
+                List<HistoryViewModel> result = new List<HistoryViewModel>();
+
+                for (int i = (int)offset; i < data.Count() && i < offset + limit; i++)
+                {
+                    result.Add(data[i].ToViewModel(id));
+                }
+
                 return new ObjectResult(result);
             }
             else
@@ -323,6 +376,45 @@ namespace SchoolBusAPI.Services.Impl
                 return new StatusCodeResult(404);
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>Add a History record to the SchoolBus</remarks>
+        /// <param name="id">id of SchoolBus to fetch History for</param>
+        /// <param name="item"></param>
+        /// <response code="201">History created</response>
+        public virtual IActionResult SchoolbusesIdHistoryPostAsync(int id, History item)
+        {
+            HistoryViewModel result = new HistoryViewModel();
+
+            bool exists = _context.SchoolBuss.Any(a => a.Id == id);
+            if (exists)
+            {
+                SchoolBus schoolBus = _context.SchoolBuss
+                    .Include(x => x.History)
+                    .First(a => a.Id == id);
+                if (schoolBus.History == null)
+                {
+                    schoolBus.History = new List<History>();
+                }
+                // force add
+                item.Id = 0;
+                schoolBus.History.Add(item);
+                _context.SchoolBuss.Update(schoolBus);
+                _context.SaveChanges();
+            }
+
+            result.HistoryText = item.HistoryText;
+            result.Id = item.Id;
+            result.LastUpdateTimestamp = item.LastUpdateTimestamp;
+            result.LastUpdateUserid = item.LastUpdateUserid;
+            result.AffectedEntityId = id;
+            
+            return new ObjectResult(result);
+        }
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -348,6 +440,182 @@ namespace SchoolBusAPI.Services.Impl
                 return new StatusCodeResult(404);
             }
         }
+
+        /// <summary>
+        /// Returns a PDF Permit
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public virtual IActionResult SchoolbusesIdPdfpermitGetAsync (int id)        
+        {
+            FileContentResult result = null;
+            bool exists = _context.SchoolBuss.Any(a => a.Id == id);
+            if (exists)
+            {
+                SchoolBus schoolBus = _context.SchoolBuss
+                    .Include(x => x.CCWData)
+                    .Include(x => x.SchoolBusOwner.PrimaryContact)
+                    .Include(x => x.SchoolDistrict)
+                    .First(a => a.Id == id);
+
+                // construct the view model.
+
+                PermitViewModel permitViewModel = new PermitViewModel();
+
+                // only do the ICBC fields if the CCW data is available.
+
+                if (schoolBus.CCWData != null)
+                {
+                    permitViewModel.IcbcMake = schoolBus.CCWData.ICBCMake;
+                    permitViewModel.IcbcModelYear = schoolBus.CCWData.ICBCModelYear;
+                    permitViewModel.IcbcRegistrationNumber = schoolBus.CCWData.ICBCRegistrationNumber;
+                    permitViewModel.VehicleIdentificationNumber = schoolBus.CCWData.ICBCVehicleIdentificationNumber;
+                    
+                    permitViewModel.SchoolBusOwnerAddressLine1 = schoolBus.CCWData.ICBCRegOwnerAddr1;
+
+                    // line 2 is a combination of the various fields that may contain data.
+                    List<string> strings = new List<string>();
+                    if (! string.IsNullOrWhiteSpace (schoolBus.CCWData.ICBCRegOwnerAddr2))
+                    {
+                        strings.Add(schoolBus.CCWData.ICBCRegOwnerAddr2);
+                    }
+                    if (!string.IsNullOrWhiteSpace(schoolBus.CCWData.ICBCRegOwnerCity))
+                    {
+                        strings.Add(schoolBus.CCWData.ICBCRegOwnerCity);
+                    }
+                    if (!string.IsNullOrWhiteSpace(schoolBus.CCWData.ICBCRegOwnerProv))
+                    {
+                        strings.Add(schoolBus.CCWData.ICBCRegOwnerProv);
+                    }                    
+                    if (!string.IsNullOrWhiteSpace(schoolBus.CCWData.ICBCRegOwnerPostalCode))
+                    {
+                        strings.Add(schoolBus.CCWData.ICBCRegOwnerPostalCode);
+                    }
+                    if (strings.Count > 0)
+                    {
+                        permitViewModel.SchoolBusOwnerAddressLine2 = String.Join(", ", strings);
+                    }
+
+                    permitViewModel.SchoolBusOwnerPostalCode = schoolBus.CCWData.ICBCRegOwnerPostalCode;
+                    permitViewModel.SchoolBusOwnerProvince = schoolBus.CCWData.ICBCRegOwnerProv;
+                    permitViewModel.SchoolBusOwnerCity = schoolBus.CCWData.ICBCRegOwnerCity;
+                    permitViewModel.SchoolBusOwnerName = schoolBus.CCWData.ICBCRegOwnerName;
+                    
+                }
+                permitViewModel.PermitIssueDate = null;
+                if (schoolBus.PermitIssueDate != null)
+                {
+                    // Since the PDF template is raw HTML and won't convert a date object, we must adjust the time zone here.                    
+                    TimeZoneInfo tzi = null;
+                    try
+                    {
+                        // try the IANA timzeone first.
+                        tzi = TimeZoneInfo.FindSystemTimeZoneById("America / Vancouver");                        
+                    }
+                    catch (Exception e)
+                    {
+                        tzi = null;
+                    }
+
+                    if (tzi == null)
+                    {
+                        try
+                        {
+                            tzi = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+                        }
+                        catch (Exception e)
+                        {
+                            tzi = null;
+                        }
+                    }
+                    DateTime dto = DateTime.UtcNow;
+                    if (tzi != null)
+                    {
+                        dto = TimeZoneInfo.ConvertTime((DateTime)schoolBus.PermitIssueDate, tzi);
+                        
+                    }
+                    else
+                    {
+                        dto = (DateTime) schoolBus.PermitIssueDate;
+                    
+                    }
+                    permitViewModel.PermitIssueDate = dto.ToString("yyyy-MM-dd");
+
+                }
+                
+                permitViewModel.PermitNumber = schoolBus.PermitNumber;
+                permitViewModel.RestrictionsText = schoolBus.RestrictionsText;
+                permitViewModel.SchoolBusMobilityAidCapacity = schoolBus.MobilityAidCapacity.ToString();
+                permitViewModel.UnitNumber = schoolBus.UnitNumber;
+                permitViewModel.PermitClassCode = schoolBus.PermitClassCode;
+                permitViewModel.BodyTypeCode = schoolBus.BodyTypeCode;             
+                permitViewModel.SchoolBusSeatingCapacity = schoolBus.SchoolBusSeatingCapacity;
+
+                if (schoolBus.SchoolDistrict != null)
+                {
+                    permitViewModel.SchoolDistrictshortName = schoolBus.SchoolDistrict.ShortName;
+                }
+
+                string payload = JsonConvert.SerializeObject(permitViewModel);
+
+                // pass the request on to the PDF Micro Service
+                string pdfHost = Configuration["PDF_SERVICE_NAME"];
+                
+                string targetUrl = pdfHost + "/api/PDF/GetPDF";
+                
+                // call the microservice
+                try
+                {
+                    HttpClient client = new HttpClient();
+
+                    var request = new HttpRequestMessage(HttpMethod.Post, targetUrl);
+                    request.Content = new StringContent(payload, Encoding.UTF8, "application/json"); 
+                                        
+                    request.Headers.Clear();
+                    // transfer over the request headers.
+                    foreach (var item in Request.Headers)
+                    {
+                        string key = item.Key;
+                        string value = item.Value;
+                        request.Headers.Add(key, value);
+                    }
+
+                    Task<HttpResponseMessage> responseTask = client.SendAsync(request);
+                    responseTask.Wait();
+
+                    HttpResponseMessage response = responseTask.Result;
+                    if (response.StatusCode == HttpStatusCode.OK) // success
+                    {
+                        var bytetask = response.Content.ReadAsByteArrayAsync();
+                        bytetask.Wait();
+                        
+                        result = new FileContentResult(bytetask.Result, "application/pdf");
+                        result.FileDownloadName = "Permit-" + schoolBus.PermitNumber + ".pdf";                        
+                    }
+                }
+                catch (Exception e)
+                {
+                    result = null;
+                }
+
+                // check that the result has a value
+                if (result != null)
+                {
+                    return result;
+                }
+                else
+                {
+                    return new StatusCodeResult(400); // problem occured
+                }
+
+            }
+            else
+            {
+                // record not found
+                return new StatusCodeResult(404);
+            }
+        }
+
         /// <summary>
         /// Updates a single school bus object
         /// </summary>
@@ -428,6 +696,53 @@ namespace SchoolBusAPI.Services.Impl
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>Obtains a new permit number for the indicated Schoolbus.  Returns the updated SchoolBus record.</remarks>
+        /// <param name="id">id of SchoolBus to obtain a new permit number for</param>
+        /// <response code="200">OK</response>
+        public virtual IActionResult SchoolbusesIdNewpermitPutAsync(int id)
+        {
+            bool exists = _context.SchoolBuss.Any(a => a.Id == id);
+            if (exists)
+            {
+                // get the current max permit number.
+
+                int permit = 36000;
+                var maxPermitRecord = _context.SchoolBuss
+                    .OrderByDescending(x => x.PermitNumber)
+                    .FirstOrDefault(x => x.PermitNumber != null);
+
+                if (maxPermitRecord != null)
+                {
+                    permit = (int)maxPermitRecord.PermitNumber + 1;
+                }
+
+                var item = _context.SchoolBuss
+                    .Include(x => x.HomeTerminalCity)
+                    .Include(x => x.SchoolDistrict)
+                    .Include(x => x.SchoolBusOwner.PrimaryContact)
+                    .Include(x => x.District.Region)
+                    .Include(x => x.Inspector)
+                    .Include(x => x.CCWData)                   
+                    .First(a => a.Id == id);
+
+                item.PermitNumber = permit;
+                item.PermitIssueDate = DateTime.UtcNow;
+
+                _context.SchoolBuss.Update(item);
+                _context.SaveChanges();
+
+                return new ObjectResult(item);
+            }
+            else
+            {
+                // record not found
+                return new StatusCodeResult(404);
+            }
+        }
+
+        /// <summary>
         /// Searches school buses
         /// </summary>
         /// <remarks>Used for the search schoolbus page.</remarks>        
@@ -449,11 +764,10 @@ namespace SchoolBusAPI.Services.Impl
 
             // Eager loading of related data
             var data = _context.SchoolBuss
-                .Include(x => x.HomeTerminalCity)
-                .Include(x => x.SchoolDistrict)
-                .Include(x => x.SchoolBusOwner.PrimaryContact)
-                .Include(x => x.District.Region)
-                .Include(x => x.Inspector)
+                .Include(x => x.HomeTerminalCity)                
+                .Include(x => x.SchoolBusOwner)
+                .Include(x => x.District)
+                .Include(x => x.Inspector)                
                 .Select(x => x);
 
             bool keySearch = false;
@@ -462,7 +776,16 @@ namespace SchoolBusAPI.Services.Impl
 
             if (regi != null)
             {
-                data = data.Where(x => x.ICBCRegistrationNumber == regi);
+                // first convert the regi to a number.
+                int tempRegi;
+                bool parsed = int.TryParse(regi, out tempRegi);
+
+                if (parsed)
+                {
+                    regi = tempRegi.ToString();
+                }
+                
+                data = data.Where(x => x.ICBCRegistrationNumber.Contains(regi));
                 keySearch = true;
             }
 
@@ -529,20 +852,15 @@ namespace SchoolBusAPI.Services.Impl
                 {
                     data = data.Where(x => x.SchoolBusOwner.Id == owner);
                 }
-
-                if (includeInactive == null)
-                {
-                    data = data.Where(x => x.Status == "Active");
-                }
-
+                
                 if (includeInactive == null || (includeInactive != null && includeInactive == false))
                 {
-                    data = data.Where(x => x.Status == "Active");
+                    data = data.Where(x => x.Status.ToLower() == "active");
                 }
 
                 if (onlyReInspections != null && onlyReInspections == true)
                 {
-                    data = data.Where(x => x.NextInspectionTypeCode == "Re-inspection");
+                    data = data.Where(x => x.NextInspectionTypeCode.ToLower() == "re-inspection");
                 }
 
                 if (startDate != null)

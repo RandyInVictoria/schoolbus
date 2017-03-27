@@ -19,6 +19,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using SchoolBusAPI.Models;
 
 namespace SchoolBusAPI.Models
 {
@@ -27,7 +28,7 @@ namespace SchoolBusAPI.Models
     /// </summary>
         [MetaDataExtension (Description = "The MOTI-defined Service Areas - must match the official MOTI List")]
 
-    public partial class ServiceArea : IEquatable<ServiceArea>
+    public partial class ServiceArea : AuditableEntity, IEquatable<ServiceArea>
     {
         /// <summary>
         /// Default constructor, required by entity framework
@@ -90,9 +91,11 @@ namespace SchoolBusAPI.Models
         
         /// <summary>
         /// Foreign key for District 
-        /// </summary>       
+        /// </summary>   
         [ForeignKey("District")]
-        public int? DistrictRefId { get; set; }
+		[JsonIgnore]
+		[MetaDataExtension (Description = "The district in which the Service Area is found.")]
+        public int? DistrictId { get; set; }
         
         /// <summary>
         /// The effective date of the Service Area record - NOT CURRENTLY ENFORCED IN SCHOOL BUS

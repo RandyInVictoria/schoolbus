@@ -22,6 +22,7 @@ using Swashbuckle.SwaggerGen.Annotations;
 using SchoolBusAPI.Models;
 using SchoolBusAPI.ViewModels;
 using SchoolBusAPI.Services;
+using SchoolBusAPI.Authorization;
 
 namespace SchoolBusAPI.Controllers
 {
@@ -48,6 +49,7 @@ namespace SchoolBusAPI.Controllers
         [HttpPost]
         [Route("/api/usergroups/bulk")]
         [SwaggerOperation("UsergroupsBulkPost")]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult UsergroupsBulkPost([FromBody]GroupMembership[] items)
         {
             return this._service.UsergroupsBulkPostAsync(items);
@@ -61,6 +63,7 @@ namespace SchoolBusAPI.Controllers
         [HttpPost]
         [Route("/api/userroles/bulk")]
         [SwaggerOperation("UserrolesBulkPost")]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult UserrolesBulkPost([FromBody]UserRole[] items)
         {
             return this._service.UserrolesBulkPostAsync(items);
@@ -75,6 +78,7 @@ namespace SchoolBusAPI.Controllers
         [HttpPost]
         [Route("/api/users/bulk")]
         [SwaggerOperation("UsersBulkPost")]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult UsersBulkPost([FromBody]User[] items)
         {
             return this._service.UsersBulkPostAsync(items);
@@ -105,6 +109,7 @@ namespace SchoolBusAPI.Controllers
         [HttpPost]
         [Route("/api/users/{id}/delete")]
         [SwaggerOperation("UsersIdDeletePost")]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult UsersIdDeletePost([FromRoute]int id)
         {
             return this._service.UsersIdDeletePostAsync(id);
@@ -194,16 +199,17 @@ namespace SchoolBusAPI.Controllers
         /// </summary>
         /// <remarks>Add to the active set of groups for a user</remarks>
         /// <param name="id">id of User to update</param>
-        /// <param name="items"></param>
+        /// <param name="item"></param>
         /// <response code="200">OK</response>
         /// <response code="404">User not found</response>
         [HttpPost]
         [Route("/api/users/{id}/groups")]
         [SwaggerOperation("UsersIdGroupsPost")]
         [SwaggerResponse(200, type: typeof(List<GroupMembershipViewModel>))]
-        public virtual IActionResult UsersIdGroupsPost([FromRoute]int id, [FromBody]GroupMembership[] items)
+        [RequiresPermission(Permission.ADMIN)]
+        public virtual IActionResult UsersIdGroupsPost([FromRoute]int id, [FromBody]GroupMembershipViewModel item)
         {
-            return this._service.UsersIdGroupsPostAsync(id, items);
+            return this._service.UsersIdGroupsPostAsync(id, item);
         }
 
         /// <summary>
@@ -218,7 +224,8 @@ namespace SchoolBusAPI.Controllers
         [Route("/api/users/{id}/groups")]
         [SwaggerOperation("UsersIdGroupsPut")]
         [SwaggerResponse(200, type: typeof(List<GroupMembershipViewModel>))]
-        public virtual IActionResult UsersIdGroupsPut([FromRoute]int id, [FromBody]GroupMembership[] items)
+        [RequiresPermission(Permission.ADMIN)]
+        public virtual IActionResult UsersIdGroupsPut([FromRoute]int id, [FromBody]GroupMembershipViewModel[] items)
         {
             return this._service.UsersIdGroupsPutAsync(id, items);
         }
@@ -266,6 +273,7 @@ namespace SchoolBusAPI.Controllers
         [Route("/api/users/{id}")]
         [SwaggerOperation("UsersIdPut")]
         [SwaggerResponse(200, type: typeof(UserViewModel))]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult UsersIdPut([FromRoute]int id, [FromBody]UserViewModel item)
         {
             return this._service.UsersIdPutAsync(id, item);
@@ -298,6 +306,7 @@ namespace SchoolBusAPI.Controllers
         [Route("/api/users/{id}/roles")]
         [SwaggerOperation("UsersIdRolesPost")]
         [SwaggerResponse(200, type: typeof(UserRoleViewModel))]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult UsersIdRolesPost([FromRoute]int id, [FromBody]UserRoleViewModel item)
         {
             return this._service.UsersIdRolesPostAsync(id, item);
@@ -315,6 +324,7 @@ namespace SchoolBusAPI.Controllers
         [Route("/api/users/{id}/roles")]
         [SwaggerOperation("UsersIdRolesPut")]
         [SwaggerResponse(200, type: typeof(List<UserRoleViewModel>))]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult UsersIdRolesPut([FromRoute]int id, [FromBody]UserRoleViewModel[] items)
         {
             return this._service.UsersIdRolesPutAsync(id, items);
@@ -330,6 +340,7 @@ namespace SchoolBusAPI.Controllers
         [Route("/api/users")]
         [SwaggerOperation("UsersPost")]
         [SwaggerResponse(200, type: typeof(User))]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult UsersPost([FromBody]User item)
         {
             return this._service.UsersPostAsync(item);

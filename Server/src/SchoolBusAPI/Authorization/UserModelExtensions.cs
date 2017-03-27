@@ -38,36 +38,64 @@ namespace SchoolBusAPI.Models
             if (permissions.Any())
                 claims.AddRange(permissions);
 
-            var roles = user.GetActiveRoles().Select(r => new Claim(ClaimTypes.Role, r.Name)).ToList();
-            if (roles.Any())
-                claims.AddRange(roles);
+            var roleSelect = user.GetActiveRoles().Select(r => new Claim(ClaimTypes.Role, r.Name));
+            if (roleSelect != null)
+            {
+                var roles = roleSelect.ToList();
+                if (roles.Any())
+                    claims.AddRange(roles);
+            }
 
-            var groups = user.GetActiveGroups().Select(g => new Claim(ClaimTypes.GroupSid, g.Name)).ToList();
-            if (groups.Any())
-                claims.AddRange(groups);
+            var groupSelect = user.GetActiveGroups().Select(g => new Claim(ClaimTypes.GroupSid, g.Name));
+            if (groupSelect != null)
+            {
+                var groups = groupSelect.ToList();
+                if (groups.Any())
+                {
+                    claims.AddRange(groups);
+                }                    
+            }
 
             return claims;
         }
 
         private static List<Permission> GetActivePermissions(this User user)
         {
-            return user.GetActiveRoles().SelectMany(x => x.RolePermissions).Select(x => x.Permission).Distinct().ToList();
+            List<Permission> result = null;
+
+            var activeRoles = user.GetActiveRoles();
+
+            if (activeRoles != null)
+            {
+                var rolePermissions = activeRoles
+                        .Where(x => x != null && x.RolePermissions != null)
+                        .SelectMany(x => x.RolePermissions);
+
+                if (rolePermissions != null)
+                {
+                    result = rolePermissions.Select(x => x.Permission).Distinct().ToList();
+                }
+            }
+
+            return result;
         }
 
         private static List<Role> GetActiveRoles(this User user)
         {
             List<Role> roles = new List<Role>();
-            
+
             if (user.UserRoles == null)
                 return roles;
 
             roles = user.UserRoles.Where(
-                x => x.EffectiveDate <= DateTimeOffset.Now 
-                && (x.ExpiryDate == null || x.ExpiryDate > DateTimeOffset.Now))
+                x => x.Role != null
+                && x.EffectiveDate <= DateTime.UtcNow
+                && (x.ExpiryDate == null || x.ExpiryDate > DateTime.UtcNow))
                 .Select(x => x.Role).ToList();
 
             return roles;
         }
+
 
         private static List<Group> GetActiveGroups(this User user)
         {

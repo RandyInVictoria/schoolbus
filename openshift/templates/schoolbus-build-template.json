@@ -141,6 +141,29 @@
       },
       "status": {}
     },
+	{
+      "kind": "ImageStream",
+      "apiVersion": "v1",
+      "metadata":
+      {
+        "name": "${BACKUP_NAME}",
+        "generation": 1,
+        "creationTimestamp": null
+      },
+      "spec":
+      {
+        "tags": [
+          {
+            "name": "${DEPLOYMENT_TYPE}",
+            "annotations": null,
+            "generation": null,
+            "importPolicy": {}
+          }
+
+        ]
+      },
+      "status": {}
+    },
     {
       "kind": "ImageStream",
       "apiVersion": "v1",
@@ -170,6 +193,29 @@
       "metadata":
       {
         "name": "${BACKEND_NAME}",
+        "generation": 1,
+        "creationTimestamp": null
+      },
+      "spec":
+      {
+        "tags": [
+          {
+            "name": "${DEPLOYMENT_TYPE}",
+            "annotations": null,
+            "generation": null,
+            "importPolicy": {}
+          }
+
+        ]
+      },
+      "status": {}
+    },
+	{
+      "kind": "ImageStream",
+      "apiVersion": "v1",
+      "metadata":
+      {
+        "name": "${PDF_NAME}",
         "generation": 1,
         "creationTimestamp": null
       },
@@ -445,6 +491,122 @@
         "lastVersion": 0
       }
     },
+	    {
+      "kind": "BuildConfig",
+      "apiVersion": "v1",
+      "metadata":
+      {
+        "name": "${BACKUP_NAME}",
+        "creationTimestamp": null,
+        "labels":
+        {
+          "app": "${BACKUP_NAME}"
+        }
+      },
+      "spec":
+      {
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChange": {}
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "runPolicy": "Serial",
+        "source":
+        {
+          "type": "Git",
+          "git":
+          {
+            "uri": "${SRC_REPO}",
+			"ref": "${GIT_REFERENCE}"			
+          },
+          "contextDir": "/Backup"
+        },
+        "strategy":
+        {
+          "type": "Docker"          
+        },
+        "output":
+        {
+          "to":
+          {
+            "kind": "ImageStreamTag",
+            "namespace": "tran-schoolbus-tools",
+            "name": "${BACKUP_NAME}:${DEPLOYMENT_TYPE}"
+          }
+        },
+        "resources": {},
+        "postCommit": {},
+        "nodeSelector": null
+      },
+      "status":
+      {
+        "lastVersion": 0
+      }
+    },
+	{
+      "kind": "BuildConfig",
+      "apiVersion": "v1",
+      "metadata":
+      {
+        "name": "${PDF_NAME}",
+        "creationTimestamp": null,
+        "labels":
+        {
+          "app": "${PDF_NAME}"
+        }
+      },
+      "spec":
+      {
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChange": {}
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "runPolicy": "Serial",
+        "source":
+        {
+          "type": "Git",
+          "git":
+          {
+            "uri": "${SRC_REPO}",
+			"ref": "${GIT_REFERENCE}"			
+          },
+          "contextDir": "/PDF"
+        },
+        "strategy":
+        {
+          "type": "Docker",
+          "dockerStrategy":
+          {
+			"dockerfilePath" : "PDF.Dockerfile"
+          }
+        },
+        "output":
+        {
+          "to":
+          {
+            "kind": "ImageStreamTag",
+            "namespace": "tran-schoolbus-tools",
+            "name": "${PDF_NAME}:${DEPLOYMENT_TYPE}"
+          }
+        },
+        "resources": {},
+        "postCommit": {},
+        "nodeSelector": null
+      },
+      "status":
+      {
+        "lastVersion": 0
+      }
+    },
     {
       "kind": "ImageStream",
       "apiVersion": "v1",
@@ -512,7 +674,8 @@
             {
               "kind": "ImageStreamTag",
               "name": "${CLIENT_NAME}:${DEPLOYMENT_TYPE}"
-            }
+            },
+			"noCache": true
           }
         },
         "output":
@@ -782,6 +945,13 @@
       "required": true,
       "value": "server"
     },
+	{
+      "name": "PDF_NAME",
+      "displayName": "PDF Server Name",
+      "description": "The name assigned to all of the PDF Server objects defined in this template.",
+      "required": true,
+      "value": "pdf"
+    },
     {
       "name": "RPROXY_NAME",
       "displayName": "Reverse Proxy Name (SiteMinder)",
@@ -809,6 +979,13 @@
       "description": "Optional branch, tag, or commit.",
       "required": true,
       "value": "master"
+    },
+    {
+      "name": "BACKUP_NAME",
+      "displayName": "Backup Server Name",
+      "description": "Name for the object that will perform database backups",
+      "required": true,
+      "value": "backup"
     },
     {
       "name": "EDITOR_NAME",

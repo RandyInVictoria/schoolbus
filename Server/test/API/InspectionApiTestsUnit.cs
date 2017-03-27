@@ -42,7 +42,7 @@ namespace SchoolBusAPI.Test
 		public InspectionApiUnitTest()
 		{
             DbContextOptions<DbAppContext> options = new DbContextOptions<DbAppContext>();
-            Mock<DbAppContext> dbAppContext = new Mock<DbAppContext>(options);
+            Mock<DbAppContext> dbAppContext = new Mock<DbAppContext>(null, options);
 
             /*
 
@@ -56,7 +56,7 @@ namespace SchoolBusAPI.Test
 
             */
 
-            InspectionService _service = new InspectionService(dbAppContext.Object);
+            InspectionService _service = new InspectionService(null, dbAppContext.Object);
 			
                     _InspectionApi = new InspectionController (_service);
 

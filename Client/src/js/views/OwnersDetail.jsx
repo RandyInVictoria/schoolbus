@@ -8,22 +8,24 @@ import { LinkContainer } from 'react-router-bootstrap';
 
 import _ from 'lodash';
 
+import HistoryListDialog from './dialogs/HistoryListDialog.jsx';
 import OwnersEditDialog from './dialogs/OwnersEditDialog.jsx';
 import SchoolBusesAddDialog from './dialogs/SchoolBusesAddDialog.jsx';
 
 import * as Action from '../actionTypes';
 import * as Api from '../api';
 import * as Constant from '../constants';
+import * as History from '../history';
 import store from '../store';
 
 import BadgeLabel from '../components/BadgeLabel.jsx';
-import ColField from '../components/ColField.jsx';
-import ColLabel from '../components/ColLabel.jsx';
-import Confirm from '../components/Confirm.jsx';
-import OverlayTrigger from '../components/OverlayTrigger.jsx';
+import ColDisplay from '../components/ColDisplay.jsx';
+import DeleteButton from '../components/DeleteButton.jsx';
+import EditButton from '../components/EditButton.jsx';
+import FileUpload from '../components/FileUpload.jsx';
 import SortTable from '../components/SortTable.jsx';
 import Spinner from '../components/Spinner.jsx';
-import FileUpload from '../components/FileUpload.jsx';
+import Unimplemented from '../components/Unimplemented.jsx';
 
 import { formatDateTime } from '../utils/date';
 import { plural } from '../utils/string';
@@ -41,13 +43,14 @@ var OwnersDetail = React.createClass({
       loading: true,
       loadingContacts: true,
 
-      showEditDialog: false,
       showContactDialog: false,
+      showEditDialog: false,
+      showHistoryDialog: false,
       showSchoolBusDialog: false,
 
       contact: {},
 
-      isNew: this.props.params.ownerId == 0,
+      isNew: this.props.params.ownerId === '0',
 
       ui : {
         // Contacts
@@ -84,7 +87,22 @@ var OwnersDetail = React.createClass({
   },
 
   saveEdit(owner) {
+    // Check for owner status change
+    var statusChanged = (this.props.owner.status !== owner.status) ? true : false;
+    var nameChanged = (this.props.owner.name !== owner.name) ? true : false;
+
     Api.updateOwner(owner).finally(() => {
+      // Logging
+      // Owner state change
+      if(statusChanged) {
+        History.logModifiedOwnerStatus(this.props.owner);
+      }
+
+      // Owner name change
+      if(nameChanged) {
+        History.logModifiedOwnerName(this.props.owner);
+      }
+
       this.closeEditDialog();
     });
   },
@@ -108,7 +126,22 @@ var OwnersDetail = React.createClass({
     this.setState({ showContactDialog: false });
   },
 
+  deleteContact(contact) {
+    console.debug(contact);
+  },
+
   saveContact() {
+  },
+
+  showHistoryDialog() {
+    this.setState({ showHistoryDialog: true });
+  },
+
+  closeHistoryDialog() {
+    this.setState({ showHistoryDialog: false });
+  },
+
+  print() {
   },
 
   render: function() {
@@ -119,7 +152,7 @@ var OwnersDetail = React.createClass({
 
     var inspectionNotice = (owner.isReinspection ? '&reg; ' : '') + (owner.isOverdue ? 'Overdue &ndash; ' : '')
       + daysToInspection + ' ' + plural(daysToInspection, 'day', 'days')
-      + ' &ndash; ' + formatDateTime(owner.nextInspectionDate, 'YYYY-DD-MMM');
+      + ' &ndash; ' + formatDateTime(owner.nextInspectionDate, Constant.DATE_FULL_MONTH_DAY_YEAR);
 
     var inspectionStyle = owner.isOverdue ? 'danger' : (daysToInspection <= Constant.INSPECTION_DAYS_DUE_WARNING ? 'warning' : 'success');
 
@@ -131,17 +164,19 @@ var OwnersDetail = React.createClass({
             { owner.nextInspectionDate &&
               <span className={ `label label-${inspectionStyle}` } dangerouslySetInnerHTML={{ __html: inspectionNotice }}></span>
             }
+            <Button title="History" onClick={ this.showHistoryDialog }>History</Button>
           </Col>
           <Col md={2}>
             <div className="pull-right">
-              <Button><Glyphicon glyph="print" title="Print" /></Button>
-              <LinkContainer to={{ pathname: 'owners' }}>
+              <Unimplemented>
+                <Button onClick={ this.print }><Glyphicon glyph="print" title="Print" /></Button>
+              </Unimplemented>
+              <LinkContainer to={{ pathname: Constant.OWNERS_PATHNAME }}>
                 <Button title="Return to List"><Glyphicon glyph="arrow-left" /> Return to List</Button>
               </LinkContainer>
             </div>
           </Col>
         </Row>
-
         {(() => {
           if (this.state.loading) { return <div style={{ textAlign: 'center' }}><Spinner/></div>; }
 
@@ -149,7 +184,7 @@ var OwnersDetail = React.createClass({
             <Row>
               <Col md={12}>
                 <h1>School Bus Owner: <small>{ owner.name }</small>
-                  <Button title="edit" bsSize="small" onClick={ this.openEditDialog }><Glyphicon glyph="edit" /></Button>
+                  <Button title="Edit Owner" bsSize="small" onClick={ this.openEditDialog }><Glyphicon glyph="pencil" /></Button>
                 </h1>
               </Col>
             </Row>
@@ -160,36 +195,36 @@ var OwnersDetail = React.createClass({
           <Col md={6}>
             <Well>
               <h3>School Bus Data <span className="pull-right">
-                <Button title="add" bsSize="small" onClick={ this.openSchoolBusDialog }><Glyphicon glyph="plus" /> Add School Bus</Button>
+                <Button title="Add Bus" bsSize="small" onClick={ this.openSchoolBusDialog }><Glyphicon glyph="plus" /> Add School Bus</Button>
               </span></h3>
               {(() => {
                 if (this.state.loading) { return <div style={{ textAlign: 'center' }}><Spinner/></div>; }
 
                 return <div id="owners-data">
                   <Row>
-                    <ColLabel md={4}>Number of School Buses</ColLabel>
-                    <ColField md={8}><a href={ `#school-buses?${ Constant.SCHOOL_BUS_OWNER_QUERY }=${ owner.id }` }>{ owner.numberOfBuses }</a></ColField>
+                    <ColDisplay md={12} label="Number of School Buses"><a href={ owner.busesURL }>{ owner.numberOfBuses }</a></ColDisplay>
                   </Row>
                   <Row>
-                    <ColLabel md={4}>Owner Added On</ColLabel>
-                    <ColField md={8}>{ formatDateTime(owner.dateCreated, 'YYYY-MM-DD') }</ColField>
+                    <ColDisplay md={12} label="Owner Added On">{ formatDateTime(owner.dateCreated, Constant.DATE_SHORT_MONTH_DAY_YEAR) }</ColDisplay>
                   </Row>
                   <Row>
-                    <ColLabel md={4}>Next Inspection</ColLabel>
-                    <ColField md={8}>{ formatDateTime(owner.nextInspectionDate, 'YYYY-MM-DD') }
+                    <ColDisplay md={12} label="Next Inspection">{ formatDateTime(owner.nextInspectionDate, Constant.DATE_SHORT_MONTH_DAY_YEAR) }
                       { owner.isReinspection ? <BadgeLabel bsStyle="info">R</BadgeLabel> : null }
                       { owner.isOverdue ? <BadgeLabel bsStyle="danger">!</BadgeLabel> : null }
-                    </ColField>
+                    </ColDisplay>
                   </Row>
                   <Row>
-                    <ColLabel md={4}>Main Contact</ColLabel>
-                    <ColField md={8}>{ owner.primaryContactName }</ColField>
+                    <ColDisplay md={12} label="Main Contact">{ owner.primaryContactName }</ColDisplay>
                   </Row>
                 </div>;
               })()}
             </Well>
             <Well>
-              <h3>Contacts <span className="pull-right"><Button title="addInspection" onClick={ this.addContact } bsSize="small"><Glyphicon glyph="plus" /></Button></span></h3>
+              <h3>Contacts <span className="pull-right">
+                <Unimplemented>
+                  <Button title="Add Contact" onClick={ this.addContact } bsSize="small"><Glyphicon glyph="plus" /></Button>
+                </Unimplemented>
+              </span></h3>
               {(() => {
                 if (this.state.loading ) { return <div style={{ textAlign: 'center' }}><Spinner/></div>; }
                 if (!owner.contacts || owner.contacts.length === 0) { return <Alert bsStyle="success" style={{ marginTop: 10 }}>No contacts</Alert>; }
@@ -207,7 +242,7 @@ var OwnersDetail = React.createClass({
                   { field: 'blank' },
                 ];
 
-                return <SortTable id="inspection-list" sortField={ this.state.ui.sortField } sortDesc={ this.state.ui.sortDesc } onSort={ this.updateUIState } headers={ headers }>
+                return <SortTable id="contacts-list" sortField={ this.state.ui.sortField } sortDesc={ this.state.ui.sortDesc } onSort={ this.updateUIState } headers={ headers }>
                   {
                     _.map(contacts, (contact) => {
                       return <tr key={ contact.id }>
@@ -217,10 +252,8 @@ var OwnersDetail = React.createClass({
                         <td>{ contact.role }</td>
                         <td style={{ textAlign: 'right' }}>
                           <ButtonGroup>
-                            <Button className={ contact.canEdit ? '' : 'hidden' } title="editInspection" bsSize="xsmall" onClick={ this.openInspectionDialog.bind(this, contact) }><Glyphicon glyph="pencil" /></Button>
-                            <OverlayTrigger trigger="click" placement="top" rootClose overlay={ <Confirm onConfirm={ this.deleteInspection.bind(this, contact) }/> }>
-                              <Button className={ contact.canDelete ? '' : 'hidden' } title="deleteInspection" bsSize="xsmall"><Glyphicon glyph="trash" /></Button>
-                            </OverlayTrigger>
+                            <DeleteButton name="Contact" hide={ !contact.canDelete } onConfirm={ this.deleteContact.bind(this, contact) }/>
+                            <EditButton name="Contact" view={ !contact.canEdit } onClick={ this.openContactDialog.bind(this, contact) }/>
                           </ButtonGroup>
                         </td>
                       </tr>;
@@ -245,10 +278,13 @@ var OwnersDetail = React.createClass({
         </Row>
       </div>
       { this.state.showEditDialog &&
-        <OwnersEditDialog show={ this.state.showEditDialog } onSave={ this.saveEdit } onClose= { this.closeEditDialog } />
+        <OwnersEditDialog show={ this.state.showEditDialog } onSave={ this.saveEdit } onClose={ this.closeEditDialog } />
+      }
+      { this.state.showHistoryDialog &&
+        <HistoryListDialog show={ this.state.showHistoryDialog } historyEntity={ owner.historyEntity } onClose={ this.closeHistoryDialog } />
       }
       { this.state.showSchoolBusDialog &&
-        <SchoolBusesAddDialog show={ this.state.showSchoolBusDialog } onSave={ this.closeSchoolBusDialog } onClose= { this.closeSchoolBusDialog } />
+        <SchoolBusesAddDialog show={ this.state.showSchoolBusDialog } onSave={ this.closeSchoolBusDialog } onClose={ this.closeSchoolBusDialog } />
       }
     </div>;
   },

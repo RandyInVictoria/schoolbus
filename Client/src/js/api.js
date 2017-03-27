@@ -2,8 +2,9 @@ import store from './store';
 
 import * as Action from './actionTypes';
 import * as Constant from './constants';
+import * as History from './history';
 
-import { daysFromToday, hoursAgo, sortableDateTime } from './utils/date';
+import { daysFromToday, formatDateTime, hoursAgo, sortableDateTime } from './utils/date';
 import { ApiRequest } from './utils/http';
 import { lastFirstName, firstLastName, concat } from './utils/string';
 
@@ -15,17 +16,46 @@ import _ from 'lodash';
 ////////////////////
 
 function parseUser(user) {
-  if (!user.district) { user.district = { id: '', name: '' }; }
+  if (!user.district) { user.district = { id: 0, name: '' }; }
+  if (!user.userRoles) { user.userRoles = []; }
   if (!user.groupMemberships) { user.groupMemberships = []; }
 
   user.name = lastFirstName(user.surname, user.givenName);
   user.fullName = firstLastName(user.givenName, user.surname);
   user.districtName = user.district.name;
+
+  user.path = `${ Constant.USERS_PATHNAME }/${ user.id }`;
+  user.url = `#/${ user.path }`;
+  user.historyEntity = History.makeHistoryEntity(History.USER, user);
+
+  user.groupNames = _.chain(user.groupMemberships).filter(membership => {
+    return membership.group && membership.group.name;
+  }).map(membership =>{
+    return membership.group.name;
+  }).sortBy(name =>{
+    return name;
+  }).join(', ').value();
+
+  // This field is formatted to be used in updateUserGroups(), which expects
+  // [ { groupId: 1 }, { groupId: 2 }, ... ]
+  user.groupIds = _.filter(user.groupMemberships, membership => {
+    return membership.group && membership.group.id;
+  }).map(membership =>{
+    return { groupId: membership.group.id };
+  });
+
+  _.each(user.userRoles, userRole =>{
+    userRole.roleId = userRole.role && userRole.role.id ? userRole.role.id : 0;
+    userRole.roleName = userRole.role && userRole.role.name ? userRole.role.name : '';
+    userRole.effectiveDateSort = sortableDateTime(user.effectiveDate);
+    userRole.expiryDateSort = sortableDateTime(user.expiryDate);
+  });
+
   user.canEdit = true;
   user.canDelete = true;
 
   var inspectorGroupId = getInspectorGroupId();
-  var isInspector = _.find(user.groupMemberships, (membership) => {
+  var isInspector = _.find(user.groupMemberships, membership => {
     return (membership.group && membership.group.id === inspectorGroupId);
   });
   user.isInspector = isInspector !== undefined;
@@ -110,6 +140,127 @@ export function deleteUser(user) {
   });
 }
 
+export function addUserHistory(userId, history) {
+  return new ApiRequest(`/users/${ userId }/history`).post(history);
+}
+
+export function getUserHistory(userId, params) {
+  return new ApiRequest(`/users/${ userId }/history`).get(params).then(response => {
+    // Normalize the response
+    var history = _.fromPairs(response.map(history => [ history.id, history ]));
+
+    // Add display fields
+    _.map(history, history => { parseHistory(history); });
+
+    store.dispatch({ type: Action.UPDATE_HISTORY, history: history });
+  });
+}
+
+export function updateUserGroups(user) {
+  return new ApiRequest(`/users/${ user.id }/groups`).put(user.groupIds).then(() => {
+    // After updating the user's group, refresh the user state.
+    return getUser(user.id);
+  });
+}
+
+export function addUserRole(userId, userRole) {
+  return new ApiRequest(`/users/${ userId }/roles`).post(userRole).then(() => {
+    // After updating the user's role, refresh the user state.
+    return getUser(userId);
+  });
+}
+
+export function updateUserRoles(userId, userRoleArray) {
+  return new ApiRequest(`/users/${ userId }/roles`).put(userRoleArray).then(() => {
+    // After updating the user's role, refresh the user state.
+    return getUser(userId);
+  });
+}
+
+////////////////////
+// Roles / Permissions
+////////////////////
+
+function parseRole(role) {
+  role.canEdit = true;
+  role.canDelete = false;
+
+  role.path = `${ Constant.ROLES_PATHNAME }/${ role.id }`;
+  role.url = `#/${ role.path }`;
+  role.historyEntity = History.makeHistoryEntity(History.ROLE, role);
+}
+
+export function searchRoles(params) {
+  return new ApiRequest('/roles').get(params).then(response => {
+    // Normalize the response
+    var roles = _.fromPairs(response.map(role => [ role.id, role ]));
+
+    // Add display fields
+    _.map(roles, role => { parseRole(role); });
+
+    store.dispatch({ type: Action.UPDATE_ROLES, roles: roles });
+  });
+}
+
+export function getRole(roleId) {
+  return new ApiRequest(`/roles/${ roleId }`).get().then(response => {
+    var role = response;
+
+    // Add display fields
+    parseRole(role);
+
+    store.dispatch({ type: Action.UPDATE_ROLE, role: role });
+  });
+}
+
+export function addRole(role) {
+  return new ApiRequest('/roles').post(role).then(response => {
+    var role = response;
+
+    // Add display fields
+    parseRole(role);
+
+    store.dispatch({ type: Action.ADD_ROLE, role: role });
+  });
+}
+
+export function updateRole(role) {
+  return new ApiRequest(`/roles/${ role.id }`).put(role).then(response => {
+    var role = response;
+
+    // Add display fields
+    parseRole(role);
+
+    store.dispatch({ type: Action.UPDATE_ROLE, role: role });
+  });
+}
+
+export function deleteRole(role) {
+  return new ApiRequest(`/roles/${ role.id }/delete`).post().then(response => {
+    var role = response;
+
+    // Add display fields
+    parseRole(role);
+
+    store.dispatch({ type: Action.DELETE_ROLE, role: role });
+  });
+}
+
+export function getRolePermissions(roleId) {
+  return new ApiRequest(`/roles/${ roleId }/permissions`).get().then(response => {
+    var permissions = _.fromPairs(response.map(permission => [ permission.id, permission ]));
+
+    store.dispatch({ type: Action.UPDATE_ROLE_PERMISSIONS, rolePermissions: permissions });
+  });
+}
+
+export function updateRolePermissions(roleId, permissionsArray) {
+  return new ApiRequest(`/roles/${ roleId }/permissions`).put(permissionsArray).then(() => {
+    // After updating the role's permissions, refresh the permissions state.
+    return getRolePermissions(roleId);
+  });
+}
+
 ////////////////////
 // Favourites
 ////////////////////
@@ -152,16 +303,26 @@ export function deleteFavourite(favourite) {
 // School Buses
 ////////////////////
 
+function parseCCW(ccw) {
+  if (ccw.icbcRebuiltStatus === 'R') {
+    ccw.icbcRebuiltStatus = 'R - Rebuilt';
+  } else if (ccw.icbcRebuiltStatus === 'S') {
+    ccw.icbcRebuiltStatus = 'S - Salvage';
+  }
+}
+
 function parseSchoolBus(bus) {
-  if (!bus.schoolBusOwner)   { bus.schoolBusOwner   = { id: '', name: '' }; }
-  if (!bus.district)         { bus.district         = { id: '', name: '' }; }
-  if (!bus.schoolDistrict)   { bus.schoolDistrict   = { id: '', name: '', shortName: '' }; }
-  if (!bus.homeTerminalCity) { bus.homeTerminalCity = { id: '', name: '' }; }
-  if (!bus.inspector)        { bus.inspector        = { id: '', givenName: '', surname: '' }; }
+  if (!bus.schoolBusOwner)   { bus.schoolBusOwner   = { id: 0, name: '' }; }
+  if (!bus.district)         { bus.district         = { id: 0, name: '' }; }
+  if (!bus.schoolDistrict)   { bus.schoolDistrict   = { id: 0, name: '', shortName: '' }; }
+  if (!bus.homeTerminalCity) { bus.homeTerminalCity = { id: 0, name: '' }; }
+  if (!bus.inspector)        { bus.inspector        = { id: 0, givenName: '', surname: '' }; }
+
+  if (bus.ccwData) { parseCCW(bus.ccwData); }
 
   bus.isActive = bus.status === Constant.STATUS_ACTIVE;
   bus.ownerName = bus.schoolBusOwner.name;
-  bus.ownerPath = bus.schoolBusOwner.id ? '#/owners/' + bus.schoolBusOwner.id : '';
+  bus.ownerURL = bus.schoolBusOwner.id ? `#/${ Constant.OWNERS_PATHNAME }/${ bus.schoolBusOwner.id }` : '';
   bus.districtName = bus.district.name;
   bus.schoolDistrictName = bus.schoolDistrict.name;
   bus.homeTerminalAddress = concat(bus.homeTerminalAddress1, bus.homeTerminalAddress2, ', ');
@@ -172,6 +333,13 @@ function parseSchoolBus(bus) {
   bus.inspectorName = firstLastName(bus.inspector.givenName, bus.inspector.surname);
   bus.isReinspection = bus.nextInspectionTypeCode === Constant.INSPECTION_TYPE_REINSPECTION;
   bus.nextInspectionDateSort = sortableDateTime(bus.nextInspectionDate);
+
+  bus.path = `${ Constant.BUSES_PATHNAME }/${ bus.id }`;
+  bus.url = `#/${ bus.path }`;
+  bus.name = `VIN ${ bus.vehicleIdentificationNumber }`;
+  bus.historyEntity = History.makeHistoryEntity(History.BUS, bus);
+
+  bus.canView = true;
   bus.canEdit = true;
   bus.canDelete = false;
 }
@@ -254,6 +422,9 @@ export function addSchoolBusCCW(ccw) {
   return new ApiRequest('/ccwdata').post(ccw).then(response => {
     var schoolBusCCW = response || {};
 
+    // Add display fields
+    parseCCW(schoolBusCCW);
+
     store.dispatch({ type: Action.ADD_BUS_CCW, schoolBusCCW: schoolBusCCW });
   });
 }
@@ -262,16 +433,26 @@ export function getSchoolBusCCW(schoolBusId) {
   return new ApiRequest(`/schoolbuses/${ schoolBusId }/ccwdata`).get().then(response => {
     var schoolBusCCW = response || {};
 
+    // Add display fields
+    parseCCW(schoolBusCCW);
+
     store.dispatch({ type: Action.UPDATE_BUS_CCW, schoolBusCCW: schoolBusCCW });
   });
 }
 
-export function getSchoolBusHistories(schoolBusId) {
-  return new ApiRequest(`/schoolbuses/${ schoolBusId }/history`).get().then(response => {
-    // Normalize the response
-    var schoolBusHistories = _.fromPairs(response.map(history => [ history.id, history ]));
+export function addSchoolBusHistory(schoolBusId, history) {
+  return new ApiRequest(`/schoolbuses/${ schoolBusId }/history`).post(history);
+}
 
-    store.dispatch({ type: Action.UPDATE_BUS_HISTORIES, schoolBusHistories: schoolBusHistories });
+export function getSchoolBusHistory(schoolBusId, params) {
+  return new ApiRequest(`/schoolbuses/${ schoolBusId }/history`).get(params).then(response => {
+    // Normalize the response
+    var history = _.fromPairs(response.map(history => [ history.id, history ]));
+
+    // Add display fields
+    _.map(history, history => { parseHistory(history); });
+
+    store.dispatch({ type: Action.UPDATE_HISTORY, history: history });
   });
 }
 
@@ -296,18 +477,36 @@ export function getSchoolBusNotes(schoolBusId) {
   });
 }
 
+export function newSchoolBusPermit(schoolBusId) {
+  return new ApiRequest(`/schoolbuses/${ schoolBusId }/newpermit`).put().then(response => {
+    var bus = response;
+
+    // Add display fields
+    parseSchoolBus(bus);
+
+    store.dispatch({ type: Action.UPDATE_BUS, schoolBus: bus });
+  });
+}
+
+export function getSchoolBusPermitURL(schoolBusId) {
+  // Not an API call, per se, as it must be called from the browser window.
+  return `${ location.origin }${ location.pathname}api/schoolbuses/${ schoolBusId }/pdfpermit`;
+}
+
 ////////////////////
 // CCW
 ////////////////////
 
 export function searchCCW(params) {
-  /*
 
-  For devenv testing
+/*
+  // For devenv testing
 
   var ccwResponse = {
     'id': 0,
     'icbcRegistrationNumber': '09281972',
+    'icbcLicencePlateNumber': 'KHS 774',
+    'icbcVehicleIdentificationNumber': '4UZABRCS48CY61422',
     'icbcModelYear': 1982,
     'icbcVehicleType': '2',
     'icbcRateClass': '671',
@@ -356,6 +555,9 @@ export function searchCCW(params) {
   return new ApiRequest('/ccwdata/fetch').get(params).then(response => {
     var ccw = response || {};
 
+    // Add display fields
+    parseCCW(ccw);
+
     store.dispatch({ type: Action.UPDATE_BUS_CCW, schoolBusCCW: ccw });
   });
 }
@@ -367,9 +569,15 @@ export function searchCCW(params) {
 function parseInspection(inspection) {
   inspection.inspectorName = inspection.inspector ? firstLastName(inspection.inspector.givenName, inspection.inspector.surname) : '';
   inspection.isReinspection = inspection.inspectionTypeCode === Constant.INSPECTION_TYPE_REINSPECTION;
+  inspection.inspectionDateSort = sortableDateTime(inspection.inspectionDate);
+
+  inspection.path = inspection.schoolBus ? `${ Constant.BUSES_PATHNAME }/${ inspection.schoolBus.id }/${ Constant.INSPECTION_PATHNAME }/${ inspection.id }` : null;
+  inspection.url = inspection.path ? `#/${ inspection.path }` : null;
+  inspection.name = `(${ formatDateTime(inspection.inspectionDate, Constant.DATE_SHORT_MONTH_DAY_YEAR) })`;
+  inspection.historyEntity = History.makeHistoryEntity(History.INSPECTION, inspection);
+
   inspection.canEdit = hoursAgo(inspection.createdDate) <= Constant.INSPECTION_EDIT_GRACE_PERIOD_HOURS;
   inspection.canDelete = hoursAgo(inspection.createdDate) <= Constant.INSPECTION_DELETE_GRACE_PERIOD_HOURS;
-  inspection.inspectionDateSort = sortableDateTime(inspection.inspectionDate);
 }
 
 export function getInspection(id) {
@@ -386,7 +594,7 @@ export function getInspection(id) {
 export function addInspection(inspection) {
   return new ApiRequest('/inspections').post(inspection).then(response => {
     // Normalize the response
-    var inspection = _.fromPairs([[ response.id, response ]]);
+    var inspection = response;
 
     // Add display fields
     parseInspection(inspection);
@@ -398,7 +606,7 @@ export function addInspection(inspection) {
 export function updateInspection(inspection) {
   return new ApiRequest(`/inspections/${ inspection.id }`).put(inspection).then(response => {
     // Normalize the response
-    var inspection = _.fromPairs([[ response.id, response ]]);
+    var inspection = response;
 
     // Add display fields
     parseInspection(inspection);
@@ -410,7 +618,7 @@ export function updateInspection(inspection) {
 export function deleteInspection(inspection) {
   return new ApiRequest(`/inspections/${ inspection.id }/delete`).post().then(response => {
     // Normalize the response
-    var inspection = _.fromPairs([[ response.id, response ]]);
+    var inspection = response;
 
     // Add display fields
     parseInspection(inspection);
@@ -425,11 +633,18 @@ export function deleteInspection(inspection) {
 
 function parseOwner(owner) {
   owner.isActive = owner.status === Constant.STATUS_ACTIVE;
+  owner.busesURL = `#/${ Constant.BUSES_PATHNAME }?${ Constant.SCHOOL_BUS_OWNER_QUERY }=${ owner.id }`;
   owner.primaryContactName = owner.primaryContact ? firstLastName(owner.primaryContact.givenName, owner.primaryContact.surname) : '';
   owner.daysToInspection = daysFromToday(owner.nextInspectionDate);
   owner.isOverdue = owner.daysToInspection < 0;
   owner.isReinspection = owner.nextInspectionTypeCode === Constant.INSPECTION_TYPE_REINSPECTION;
   owner.nextInspectionDateSort = sortableDateTime(owner.nextInspectionDate);
+
+  owner.path = `${ Constant.OWNERS_PATHNAME }/${ owner.id }`;
+  owner.url = `#/${ owner.path }`;
+  owner.historyEntity = History.makeHistoryEntity(History.OWNER, owner);
+
+  owner.canView = true;
   owner.canEdit = true;
   owner.canDelete = owner.numberOfBuses === 0 && hoursAgo(owner.dateCreated) <= Constant.OWNER_DELETE_GRACE_PERIOD_HOURS;
 }
@@ -499,6 +714,22 @@ export function deleteOwner(owner) {
     parseOwner(owner);
 
     store.dispatch({ type: Action.DELETE_OWNER, owner: owner });
+  });
+}
+
+export function addOwnerHistory(ownerId, history) {
+  return new ApiRequest(`/schoolbusowners/${ ownerId }/history`).post(history);
+}
+
+export function getOwnerHistory(ownerId, params) {
+  return new ApiRequest(`/schoolbusowners/${ ownerId }/history`).get(params).then(response => {
+    // Normalize the response
+    var history = _.fromPairs(response.map(history => [ history.id, history ]));
+
+    // Add display fields
+    _.map(history, history => { parseHistory(history); });
+
+    store.dispatch({ type: Action.UPDATE_HISTORY, history: history });
   });
 }
 
@@ -572,6 +803,32 @@ export function getInspectors() {
 
     store.dispatch({ type: Action.UPDATE_INSPECTORS_LOOKUP, inspectors: users });
   });
+}
+
+export function getRoles() {
+  return new ApiRequest('/roles').get().then(response => {
+    // Normalize the response
+    var roles = _.fromPairs(response.map(role => [ role.id, role ]));
+
+    store.dispatch({ type: Action.UPDATE_ROLES_LOOKUP, roles: roles });
+  });
+}
+
+export function getPermissions() {
+  return new ApiRequest('/permissions').get().then(response => {
+    // Normalize the response
+    var permissions = _.fromPairs(response.map(permission => [ permission.id, permission ]));
+
+    store.dispatch({ type: Action.UPDATE_PERMISSIONS_LOOKUP, permissions: permissions });
+  });
+}
+
+////////////////////
+// History
+////////////////////
+
+function parseHistory(history) {
+  history.timestampSort = sortableDateTime(history.lastUpdateTimestamp);
 }
 
 ////////////////////

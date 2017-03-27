@@ -22,6 +22,7 @@ using Swashbuckle.SwaggerGen.Annotations;
 using SchoolBusAPI.Models;
 using SchoolBusAPI.ViewModels;
 using SchoolBusAPI.Services;
+using SchoolBusAPI.Authorization;
 
 namespace SchoolBusAPI.Controllers
 {
@@ -48,6 +49,7 @@ namespace SchoolBusAPI.Controllers
         [HttpPost]
         [Route("/api/schoolbuses/bulk")]
         [SwaggerOperation("SchoolbusesBulkPost")]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult SchoolbusesBulkPost([FromBody]SchoolBus[] items)
         {
             return this._service.SchoolbusesBulkPostAsync(items);
@@ -76,7 +78,7 @@ namespace SchoolBusAPI.Controllers
         [HttpGet]
         [Route("/api/schoolbuses/{id}/attachments")]
         [SwaggerOperation("SchoolbusesIdAttachmentsGet")]
-        [SwaggerResponse(200, type: typeof(List<Attachment>))]
+        [SwaggerResponse(200, type: typeof(List<AttachmentViewModel>))]
         public virtual IActionResult SchoolbusesIdAttachmentsGet([FromRoute]int id)
         {
             return this._service.SchoolbusesIdAttachmentsGetAsync(id);
@@ -131,14 +133,32 @@ namespace SchoolBusAPI.Controllers
         /// </summary>
         /// <remarks>Returns History for a particular SchoolBus</remarks>
         /// <param name="id">id of SchoolBus to fetch History for</param>
+        /// <param name="offset">offset for records that are returned</param>
+        /// <param name="limit">limits the number of records returned.</param>
         /// <response code="200">OK</response>
         [HttpGet]
         [Route("/api/schoolbuses/{id}/history")]
         [SwaggerOperation("SchoolbusesIdHistoryGet")]
-        [SwaggerResponse(200, type: typeof(List<History>))]
-        public virtual IActionResult SchoolbusesIdHistoryGet([FromRoute]int id)
+        [SwaggerResponse(200, type: typeof(List<HistoryViewModel>))]
+        public virtual IActionResult SchoolbusesIdHistoryGet([FromRoute]int id, [FromQuery]int? offset, [FromQuery]int? limit)
         {
-            return this._service.SchoolbusesIdHistoryGetAsync(id);
+            return this._service.SchoolbusesIdHistoryGetAsync(id, offset, limit);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>Add a History record to the SchoolBus</remarks>
+        /// <param name="id">id of SchoolBus to fetch History for</param>
+        /// <param name="item"></param>
+        /// <response code="201">History created</response>
+        [HttpPost]
+        [Route("/api/schoolbuses/{id}/history")]
+        [SwaggerOperation("SchoolbusesIdHistoryPost")]
+        [SwaggerResponse(200, type: typeof(History))]
+        public virtual IActionResult SchoolbusesIdHistoryPost([FromRoute]int id, [FromBody]History item)
+        {
+            return this._service.SchoolbusesIdHistoryPostAsync(id, item);
         }
 
         /// <summary>
@@ -159,6 +179,21 @@ namespace SchoolBusAPI.Controllers
         /// <summary>
         /// 
         /// </summary>
+        /// <remarks>Obtains a new permit number for the indicated Schoolbus.  Returns the updated SchoolBus record.</remarks>
+        /// <param name="id">id of SchoolBus to obtain a new permit number for</param>
+        /// <response code="200">OK</response>
+        [HttpPut]
+        [Route("/api/schoolbuses/{id}/newpermit")]
+        [SwaggerOperation("SchoolbusesIdNewpermitPut")]
+        [SwaggerResponse(200, type: typeof(SchoolBus))]
+        public virtual IActionResult SchoolbusesIdNewpermitPut([FromRoute]int id)
+        {
+            return this._service.SchoolbusesIdNewpermitPutAsync(id);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <remarks>Returns notes for a particular SchoolBus.</remarks>
         /// <param name="id">id of SchoolBus to fetch notes for</param>
         /// <response code="200">OK</response>
@@ -170,6 +205,20 @@ namespace SchoolBusAPI.Controllers
         public virtual IActionResult SchoolbusesIdNotesGet([FromRoute]int id)
         {
             return this._service.SchoolbusesIdNotesGetAsync(id);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>Returns a PDF version of the permit for the selected Schoolbus</remarks>
+        /// <param name="id">id of SchoolBus to obtain the PDF permit for</param>
+        /// <response code="200">OK</response>
+        [HttpGet]
+        [Route("/api/schoolbuses/{id}/pdfpermit")]
+        [SwaggerOperation("SchoolbusesIdPdfpermitGet")]
+        public virtual IActionResult SchoolbusesIdPdfpermitGet([FromRoute]int id)
+        {
+            return this._service.SchoolbusesIdPdfpermitGetAsync(id);
         }
 
         /// <summary>

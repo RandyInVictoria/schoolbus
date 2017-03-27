@@ -42,7 +42,7 @@ namespace SchoolBusAPI.Test
 		public SchoolBusApiUnitTest()
 		{
             DbContextOptions<DbAppContext> options = new DbContextOptions<DbAppContext>();
-            Mock<DbAppContext> dbAppContext = new Mock<DbAppContext>(options);
+            Mock<DbAppContext> dbAppContext = new Mock<DbAppContext>(null, options);
 
             /*
 
@@ -56,7 +56,7 @@ namespace SchoolBusAPI.Test
 
             */
 
-            SchoolBusService _service = new SchoolBusService(dbAppContext.Object);
+            SchoolBusService _service = new SchoolBusService(null, null, dbAppContext.Object);
 			
                     _SchoolBusApi = new SchoolBusController (_service);
 

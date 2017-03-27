@@ -22,6 +22,7 @@ using Swashbuckle.SwaggerGen.Annotations;
 using SchoolBusAPI.Models;
 using SchoolBusAPI.ViewModels;
 using SchoolBusAPI.Services;
+using SchoolBusAPI.Authorization;
 
 namespace SchoolBusAPI.Controllers
 {
@@ -48,6 +49,7 @@ namespace SchoolBusAPI.Controllers
         [HttpPost]
         [Route("/api/attachments/bulk")]
         [SwaggerOperation("AttachmentsBulkPost")]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult AttachmentsBulkPost([FromBody]Attachment[] items)
         {
             return this._service.AttachmentsBulkPostAsync(items);
@@ -78,6 +80,20 @@ namespace SchoolBusAPI.Controllers
         public virtual IActionResult AttachmentsIdDeletePost([FromRoute]int id)
         {
             return this._service.AttachmentsIdDeletePostAsync(id);
+        }
+
+        /// <summary>
+        /// Returns the binary file component of an attachment
+        /// </summary>
+        /// <param name="id">Attachment Id</param>
+        /// <response code="200">OK</response>
+        /// <response code="404">Attachment not found in CCW system</response>
+        [HttpGet]
+        [Route("/api/attachments/{id}/download")]
+        [SwaggerOperation("AttachmentsIdDownloadGet")]
+        public virtual IActionResult AttachmentsIdDownloadGet([FromRoute]int id)
+        {
+            return this._service.AttachmentsIdDownloadGetAsync(id);
         }
 
         /// <summary>

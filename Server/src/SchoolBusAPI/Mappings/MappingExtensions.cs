@@ -12,6 +12,44 @@ namespace SchoolBusAPI.Mappings
     /// </summary>
     public static class MappingExtensions
     {
+
+        /// <summary>
+        /// Convert Attachment to AttachmentViewModel
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public static AttachmentViewModel ToViewModel(this Attachment model)
+        {
+            var dto = new AttachmentViewModel();
+            if (model != null)
+            {
+                dto.Description = model.Description;
+                dto.FileName = model.FileName;
+                dto.Id = model.Id;
+                dto.Type = model.Type;
+            }
+            return dto;
+        }
+
+        /// <summary>
+        /// Converts a list of Attachments to a list of AttachmentViewModels
+        /// </summary>
+        /// <param name="attachments"></param>
+        /// <returns></returns>
+        public static List<AttachmentViewModel> GetAttachmentListAsViewModel(List<Attachment> attachments)
+        {
+            List<AttachmentViewModel> result = new List<AttachmentViewModel>();
+            foreach (Attachment attachment in attachments)
+            {
+                if (attachment != null)
+                {
+                    result.Add(attachment.ToViewModel());
+                }
+            }
+            return result;
+        }
+
+
         /// <summary>
         /// Convert User to UserViewModel
         /// </summary>
@@ -27,9 +65,10 @@ namespace SchoolBusAPI.Mappings
                 dto.Email = model.Email;
                 dto.GivenName = model.GivenName;                
                 dto.Surname = model.Surname;
-                dto.Id = model.Id;
+                dto.Id = model.Id;                
                 dto.District = model.District;
                 dto.GroupMemberships = model.GroupMemberships;
+                dto.SmUserId = model.SmUserId;
                 dto.UserRoles = model.UserRoles;                
             }            
             return dto;
@@ -51,6 +90,8 @@ namespace SchoolBusAPI.Mappings
                 dto.Id = model.Id;
                 dto.District = model.District;
                 dto.GroupMemberships = model.GroupMemberships;
+                dto.SmAuthorizationDirectory = model.SmAuthorizationDirectory;
+                dto.SmUserId = model.SmUserId;
                 dto.UserRoles = model.UserRoles;
             }
             return dto;
@@ -127,6 +168,7 @@ namespace SchoolBusAPI.Mappings
             var dto = new PermissionViewModel();
             if (model != null)
             {
+                dto.Id = model.Id;
                 dto.Code = model.Code;
                 dto.Name = model.Name;
                 dto.Description = model.Description;
@@ -145,7 +187,10 @@ namespace SchoolBusAPI.Mappings
             if (model != null)
             {
                 dto.Active = model.Active;
-                dto.GroupId = model.Group.Id;
+                if (model.Group != null)
+                {
+                    dto.GroupId = model.Group.Id;
+                }                
                 dto.UserId = model.User.Id;
                 dto.Id = model.Id;
             }            
@@ -166,6 +211,26 @@ namespace SchoolBusAPI.Mappings
                 dto.Name = model.Name;
                 dto.Id = model.Id;
             }            
+            return dto;
+        }
+
+        /// <summary>
+        /// Converts a History record to a view model
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="AffectedEntityId"></param>
+        /// <returns></returns>
+        public static HistoryViewModel ToViewModel(this History model, int AffectedEntityId)
+        {
+            HistoryViewModel dto = new HistoryViewModel();
+            dto.AffectedEntityId = AffectedEntityId;
+            if (model != null)
+            {
+                dto.HistoryText = model.HistoryText;
+                dto.Id = model.Id;
+                dto.LastUpdateTimestamp = model.LastUpdateTimestamp;
+                dto.LastUpdateUserid = model.LastUpdateUserid;                
+            }
             return dto;
         }
 

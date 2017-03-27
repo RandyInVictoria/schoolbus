@@ -125,7 +125,7 @@ namespace SchoolBusAPI.Test
             UserRoleViewModel userRole = new UserRoleViewModel();
             userRole.RoleId = role_id;
             userRole.UserId = user_id;
-            userRole.EffectiveDate = DateTime.Now;
+            userRole.EffectiveDate = DateTime.UtcNow;
 
             UserRoleViewModel[] items = new UserRoleViewModel[1];
             items[0] = userRole;
@@ -180,7 +180,6 @@ namespace SchoolBusAPI.Test
         public async void TestRolePermissions()
         {
             // first create a role.
-
             string initialName = "InitialName";
             var request = new HttpRequestMessage(HttpMethod.Post, "/api/roles");
             RoleViewModel roleViewModel = new RoleViewModel();

@@ -25,6 +25,7 @@ paths:
     post:
       tags:
         - CCWData
+
       consumes:
         - application/json
       produces:
@@ -121,6 +122,7 @@ paths:
     post:
       tags:
         - CCWData
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -157,6 +159,7 @@ paths:
     post:
       tags:
         - Inspection
+
       consumes:
         - application/json
       produces:
@@ -253,6 +256,7 @@ paths:
     post:
       tags:
         - Inspection
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -289,6 +293,7 @@ paths:
     post:
       tags:
         - SchoolBus
+
       consumes:
         - application/json
       produces:
@@ -385,6 +390,7 @@ paths:
     post:
       tags:
         - SchoolBus
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -421,6 +427,7 @@ paths:
     post:
       tags:
         - Note
+
       consumes:
         - application/json
       produces:
@@ -517,6 +524,7 @@ paths:
     post:
       tags:
         - Note
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -553,6 +561,7 @@ paths:
     post:
       tags:
         - Attachment
+
       consumes:
         - application/json
       produces:
@@ -649,6 +658,7 @@ paths:
     post:
       tags:
         - Attachment
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -685,6 +695,7 @@ paths:
     post:
       tags:
         - History
+
       consumes:
         - application/json
       produces:
@@ -781,6 +792,7 @@ paths:
     post:
       tags:
         - History
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -817,6 +829,7 @@ paths:
     post:
       tags:
         - Notification
+
       consumes:
         - application/json
       produces:
@@ -913,6 +926,7 @@ paths:
     post:
       tags:
         - Notification
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -949,6 +963,7 @@ paths:
     post:
       tags:
         - NotificationEvent
+
       consumes:
         - application/json
       produces:
@@ -1045,6 +1060,7 @@ paths:
     post:
       tags:
         - NotificationEvent
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1081,6 +1097,7 @@ paths:
     post:
       tags:
         - SchoolBusOwner
+
       consumes:
         - application/json
       produces:
@@ -1177,6 +1194,7 @@ paths:
     post:
       tags:
         - SchoolBusOwner
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1213,6 +1231,7 @@ paths:
     post:
       tags:
         - Contact
+
       consumes:
         - application/json
       produces:
@@ -1309,6 +1328,7 @@ paths:
     post:
       tags:
         - Contact
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1330,6 +1350,7 @@ paths:
     get:
       tags:
         - Group
+      x-codegen-permission: ADMIN
       consumes: []
       produces:
         - text/plain
@@ -1345,6 +1366,7 @@ paths:
     post:
       tags:
         - Group
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1371,6 +1393,7 @@ paths:
     get:
       tags:
         - Group
+      x-codegen-permission: ADMIN
       consumes: []
       produces:
         - text/plain
@@ -1392,6 +1415,7 @@ paths:
     put:
       tags:
         - Group
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1420,6 +1444,7 @@ paths:
     post:
       tags:
         - Group
+      x-codegen-permission: ADMIN
       consumes: []
       produces:
         - text/plain
@@ -1441,6 +1466,7 @@ paths:
     post:
       tags:
         - Group
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1462,6 +1488,7 @@ paths:
     get:
       tags:
         - Permission
+      x-codegen-permission: ADMIN
       consumes: []
       produces:
         - text/plain
@@ -1477,6 +1504,7 @@ paths:
     post:
       tags:
         - Permission
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1503,6 +1531,7 @@ paths:
     get:
       tags:
         - Permission
+      x-codegen-permission: ADMIN
       consumes: []
       produces:
         - text/plain
@@ -1524,6 +1553,7 @@ paths:
     put:
       tags:
         - Permission
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1552,6 +1582,7 @@ paths:
     post:
       tags:
         - Permission
+      x-codegen-permission: ADMIN
       consumes: []
       produces:
         - text/plain
@@ -1573,6 +1604,7 @@ paths:
     post:
       tags:
         - Permission
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1594,6 +1626,7 @@ paths:
     get:
       tags:
         - Role
+      x-codegen-permission: ADMIN
       consumes: []
       produces:
         - text/plain
@@ -1609,6 +1642,7 @@ paths:
     post:
       tags:
         - Role
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1635,6 +1669,7 @@ paths:
     get:
       tags:
         - Role
+      x-codegen-permission: ADMIN
       consumes: []
       produces:
         - text/plain
@@ -1656,6 +1691,7 @@ paths:
     put:
       tags:
         - Role
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1684,6 +1720,7 @@ paths:
     post:
       tags:
         - Role
+      x-codegen-permission: ADMIN
       consumes: []
       produces:
         - text/plain
@@ -1705,6 +1742,7 @@ paths:
     post:
       tags:
         - Role
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1727,6 +1765,7 @@ paths:
     post:
       tags:
         - Role
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1749,6 +1788,7 @@ paths:
     post:
       tags:
         - User
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1771,6 +1811,7 @@ paths:
     post:
       tags:
         - User
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1807,6 +1848,7 @@ paths:
     post:
       tags:
         - Region
+
       consumes:
         - application/json
       produces:
@@ -1903,6 +1945,7 @@ paths:
     post:
       tags:
         - Region
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -1939,6 +1982,7 @@ paths:
     post:
       tags:
         - District
+
       consumes:
         - application/json
       produces:
@@ -2035,6 +2079,7 @@ paths:
     post:
       tags:
         - District
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -2052,6 +2097,140 @@ paths:
       responses:
         201:
           description: District created
+  /ccwjurisdictions:
+    get:
+      tags:
+        - CCWJurisdiction
+      consumes: []
+      produces:
+        - text/plain
+        - application/json
+        - text/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CCWJurisdiction"
+    post:
+      tags:
+        - CCWJurisdiction
+
+      consumes:
+        - application/json
+      produces:
+        - text/plain
+        - application/json
+        - text/json
+      parameters:
+        - name: item
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/CCWJurisdiction"
+      responses:
+        201:
+          description: CCWJurisdiction created
+          headers:
+            Location:
+              description: A link to the CCWJurisdiction
+              type: string
+              format: url
+          schema:
+            $ref: "#/definitions/CCWJurisdiction"  
+  /ccwjurisdictions/{id}:
+    get:
+      tags:
+        - CCWJurisdiction
+      consumes: []
+      produces:
+        - text/plain
+        - application/json
+        - text/json
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/CCWJurisdiction"
+        404:
+          description: CCWJurisdiction not found
+      parameters:
+        - name: id
+          in: path
+          description: id of CCWJurisdiction to fetch
+          required: true
+          type: integer
+    put:
+      tags:
+        - CCWJurisdiction
+      consumes:
+        - application/json
+      produces:
+        - text/plain
+        - application/json
+        - text/json
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/CCWJurisdiction"
+        404:
+          description: CCWJurisdiction not found
+      parameters:
+        - name: id
+          in: path
+          description: id of CCWJurisdiction to fetch
+          required: true
+          type: integer
+        - name: item
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/CCWJurisdiction"
+  /ccwjurisdictions/{id}/delete:
+    post:
+      tags:
+        - CCWJurisdiction
+      consumes: []
+      produces:
+        - text/plain
+        - application/json
+        - text/json
+      responses:
+        200:
+          description: OK
+        404:
+          description: CCWJurisdiction not found
+      parameters:
+        - name: id
+          in: path
+          description: id of CCWJurisdiction to delete
+          required: true
+          type: integer
+
+  /ccwjurisdictions/bulk:
+    post:
+      tags:
+        - CCWJurisdiction
+      x-codegen-permission: ADMIN
+      consumes:
+        - application/json
+      produces:
+        - text/plain
+        - application/json
+        - text/json
+      parameters:
+        - name: items
+          in: body
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CCWJurisdiction"
+      responses:
+        201:
+          description: CCWJurisdiction created
   /serviceareas:
     get:
       tags:
@@ -2071,6 +2250,7 @@ paths:
     post:
       tags:
         - ServiceArea
+
       consumes:
         - application/json
       produces:
@@ -2167,6 +2347,7 @@ paths:
     post:
       tags:
         - ServiceArea
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -2203,6 +2384,7 @@ paths:
     post:
       tags:
         - City
+
       consumes:
         - application/json
       produces:
@@ -2299,6 +2481,7 @@ paths:
     post:
       tags:
         - City
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -2335,6 +2518,7 @@ paths:
     post:
       tags:
         - SchoolDistrict
+
       consumes:
         - application/json
       produces:
@@ -2431,6 +2615,7 @@ paths:
     post:
       tags:
         - SchoolDistrict
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -2448,6 +2633,24 @@ paths:
       responses:
         201:
           description: SchoolDistrict created
+  /attachments/{id}/download:
+    get:
+      summary: Returns the binary file component of an attachment
+      tags:
+        - Attachment
+      consumes: []
+      produces:      
+        - application/octet-stream        
+      parameters:                
+        - name: id
+          in: path
+          description: Attachment Id
+          type: integer
+      responses:
+        200:
+          description: OK
+        404:
+          description: Attachment not found in CCW system    
   /ccwdata/fetch:
     get:
       summary: fetches data from the ICBC CCW system, and constructs a CCWData object from that.  Note that it does not perform the insert of that data into the database, only provides JSON data suitable for insertion. If a CCWData record exists in the schoolbus database then the id field will match that record, however all other data will be from the ICBC CCW system.     
@@ -2503,7 +2706,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/User"          
+              $ref: "#/definitions/UserViewModel"          
   /schoolbuses/search:
     get:
       summary: Searches school buses
@@ -2647,7 +2850,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Attachment'
+              $ref: '#/definitions/AttachmentViewModel'
         "404":
            description: SchoolBus not found
       parameters:
@@ -2655,7 +2858,7 @@ paths:
           in: path
           description: id of SchoolBus to fetch attachments for
           required: true
-          type: integer
+          type: integer    
   /schoolbuses/{id}/history:
     get:
       description: Returns History for a particular SchoolBus
@@ -2671,13 +2874,54 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/History'
+              $ref: '#/definitions/HistoryViewModel'
       parameters:
         - name: id
           in: path
           description: id of SchoolBus to fetch History for
           required: true
           type: integer
+        - name: offset
+          in: query
+          description: offset for records that are returned 
+          required: false
+          type: integer
+        - name: limit
+          in: query
+          description: limits the number of records returned.  
+          required: false
+          type: integer
+    post:
+      description: Add a History record to the SchoolBus
+      tags:
+        - SchoolBus
+      produces:
+        - text/plain
+        - application/json
+        - text/json
+      responses:
+        '200': OK
+      parameters:
+        - name: id
+          in: path
+          description: id of SchoolBus to fetch History for
+          required: true
+          type: integer
+        - name: item
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/History"
+      responses:
+        201:
+          description: History created
+          headers:
+            Location:
+              description: A link to the History
+              type: string
+              format: url
+          schema:
+            $ref: "#/definitions/History"        
   /schoolbuses/{id}/ccwdata:
     get:
       description: Returns CCWData for a particular Schoolbus
@@ -2697,7 +2941,43 @@ paths:
           in: path
           description: id of SchoolBus to fetch CCWData for
           required: true
-          type: integer          
+          type: integer
+  /schoolbuses/{id}/newpermit:
+    put:
+      description:  Obtains a new permit number for the indicated Schoolbus.  Returns the updated SchoolBus record.
+      tags:
+        - SchoolBus
+      produces:
+        - text/plain
+        - application/json
+        - text/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SchoolBus'
+      parameters:
+        - name: id
+          in: path
+          description: id of SchoolBus to obtain a new permit number for
+          required: true
+          type: integer
+  /schoolbuses/{id}/pdfpermit:
+    get:
+      description:  Returns a PDF version of the permit for the selected Schoolbus
+      tags:
+        - SchoolBus
+      produces:
+        - application/pdf
+      responses:
+        '200':
+          description: OK
+      parameters:
+        - name: id
+          in: path
+          description: id of SchoolBus to obtain the PDF permit for
+          required: true
+          type: integer                    
   /schoolbusowners/{id}/attachments:
     get:
       description: Returns attachments for a particular SchoolBusOwner
@@ -2720,6 +3000,69 @@ paths:
           description: id of SchoolBusOwner to fetch attachments for
           required: true
           type: integer
+  /schoolbusowners/{id}/history:
+    get:
+      description: Returns History for a particular SchoolBusOwner
+      tags:
+        - SchoolBusOwner
+      produces:
+        - text/plain
+        - application/json
+        - text/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/HistoryViewModel'
+      parameters:
+        - name: id
+          in: path
+          description: id of SchoolBusOwner to fetch History for
+          required: true
+          type: integer
+        - name: offset
+          in: query
+          description: offset for records that are returned 
+          required: false
+          type: integer
+        - name: limit
+          in: query
+          description: limits the number of records returned.  
+          required: false
+          type: integer
+    post:
+      description: Add a History record to the SchoolBus Owner
+      tags:
+        - SchoolBusOwner
+      produces:
+        - text/plain
+        - application/json
+        - text/json
+      responses:
+        '200': OK
+      parameters:
+        - name: id
+          in: path
+          description: id of SchoolBusOwner to add History for
+          required: true
+          type: integer
+        - name: item
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/History"
+      responses:
+        201:
+          description: History created
+          headers:
+            Location:
+              description: A link to the History
+              type: string
+              format: url
+          schema:
+            $ref: "#/definitions/History"          
   /schoolbusowners/{id}/notes:
     get:
       description: Returns notes for a particular SchoolBusOwner
@@ -2805,50 +3148,6 @@ paths:
             type: array
             items:
               $ref: "#/definitions/SchoolBusOwner"  
-  /contacts/{id}/contactphones:
-    get:
-      description: Returns phone contacts for a particular SchoolBusOwner
-      tags:
-        - Contact
-      produces:
-        - text/plain
-        - application/json
-        - text/json
-      responses:
-        '200':
-          description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/ContactPhone'
-      parameters:
-        - name: id
-          in: path
-          description: id of SchoolBusOwner to fetch contact phone for
-          required: true
-          type: integer
-  /contacts/{id}/contactaddresses:
-    get:
-      description: Returns address contacts for a particular SchoolBusOwner
-      tags:
-        - Contact
-      produces:
-        - text/plain
-        - application/json
-        - text/json
-      responses:
-        '200':
-          description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/ContactAddress'
-      parameters:
-        - name: id
-          in: path
-          description: id of SchoolBusOwner to fetch contact address for
-          required: true
-          type: integer
   /roles/{id}/permissions:
     get:
       description: Get all the permissions for a role
@@ -2875,6 +3174,7 @@ paths:
       description: Updates the permissions for a role
       tags:
         - Role
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -2893,7 +3193,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/Permission"
+              $ref: "#/definitions/PermissionViewModel"
       responses:
         200:
           description: OK
@@ -2907,6 +3207,7 @@ paths:
       description: Adds a permissions to a role
       tags:
         - Role
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -2923,7 +3224,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: "#/definitions/Permission"
+            $ref: "#/definitions/PermissionViewModel"
       responses:
         200:
           description: OK
@@ -2959,6 +3260,7 @@ paths:
       description: Updates the users for a role
       tags:
         - Role
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -3009,6 +3311,7 @@ paths:
       description: Create new user
       tags:
         - User
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -3120,7 +3423,7 @@ paths:
         - name: type
           in: path
           description: type of favourite to return
-          required: false
+          required: true
           type: string
   /users/current/favourites/{id}/delete:
     post:
@@ -3145,6 +3448,7 @@ paths:
       description: Adds a number of users
       tags:
         - User
+      x-codegen-permission: ADMIN
       produces:
         - text/plain
         - application/json
@@ -3160,6 +3464,41 @@ paths:
       responses:
         200:
           description: OK
+  /users/search:
+    get:
+      summary: Searches Users
+      description:
+        Used for the search users.
+      tags:
+        - User
+      consumes:
+        - application/json
+      produces:
+        - text/plain
+        - application/json
+        - text/json
+      parameters:        
+        - name: districts
+          in: query
+          description: Districts (array of id numbers)
+          collectionFormat: multi
+          type: array
+          items:
+            type: integer       
+        - name: surname
+          in: query
+          type: string
+        - name: includeInactive
+          in: query
+          description: True if Inactive users will be returned
+          type: boolean
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/UserViewModel"  
   /users/{id}:
     get:
       description: Returns data for a particular user
@@ -3186,6 +3525,7 @@ paths:
       description: Updates a user
       tags:
         - User
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -3215,6 +3555,7 @@ paths:
       description: Deletes a user
       tags:
         - User
+      x-codegen-permission: ADMIN
       produces:
         - text/plain
         - application/json
@@ -3307,7 +3648,7 @@ paths:
         200:
           description: OK          
         404:
-          description: User not found
+          description: User not found  
   /users/{id}/roles:
     get:
       description: Returns the roles for a user
@@ -3336,6 +3677,7 @@ paths:
       description: Adds a role to a user
       tags:
         - User
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -3367,6 +3709,7 @@ paths:
       description: Updates the roles for a user
       tags:
         - User
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -3447,6 +3790,7 @@ paths:
       description: Updates the active set of groups for a user
       tags:
         - User
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -3465,7 +3809,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/GroupMembership"
+              $ref: "#/definitions/GroupMembershipViewModel"
       responses:
         200:
           description: OK
@@ -3479,6 +3823,7 @@ paths:
       description: Add to the active set of groups for a user
       tags:
         - User
+      x-codegen-permission: ADMIN
       consumes:
         - application/json
       produces:
@@ -3491,13 +3836,11 @@ paths:
           description: id of User to update
           required: true
           type: integer
-        - name: items
+        - name: item
           in: body
           required: true
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/GroupMembership"
+            $ref: "#/definitions/GroupMembershipViewModel"
       responses:
         200:
           description: OK
@@ -3529,6 +3872,7 @@ paths:
           description: id of User to fetch notifications for
           required: true
           type: integer
+  
   /regions/{id}/districts:
     get:
       description: Returns the districts for a specific region
@@ -3604,20 +3948,29 @@ definitions:
         description:  A code used by the automotive industry to uniquely identify individual motor vehicles. A vehicle identification number is frequently referred to using the acronym VIN and it is occasionally referred to as a chassis number.
       schoolBusOwner:
         $ref: '#/definitions/SchoolBusOwner'
+        description: A foreign key reference to the system-generated unique identifier for School Bus Owner
       permitNumber:
-        type: string
-        maxLength: 20
+        format: int32
+        type: integer
         uniqueItems: true
-        description: The (generated) permit number for the School Bus. The number will be assigned sequentially by the system when the inspector generates a permit
+        description: The (generated) permit number for the School Bus. The number is set by the system when the inspector generates a permit based on a business rule permit number format.
+      permitIssueDate:
+        type: string
+        format: date-time
+        description: The date a permit number was established for this School Bus.
       status:
         type: string
         maxLength: 20
         description: Status of the school bus record - current values are Inactive, Active, Archived
       isOutOfProvince:
         type: boolean
-        description: True if the School Bus is registered within BC, else False
+        description: True if the School Bus is registered outside of BC.
+      CCWJurisdiction:
+        $ref: '#/definitions/CCWJurisdiction'
+        description: The Jurisdication of an Out Of Province Bus. Needed for querying CCW.
       District:
         $ref: '#/definitions/District'
+        description: A foreign key reference to the system-generated unique identifier for a 
       homeTerminalAddress1:
         type: string
         maxLength: 80
@@ -3701,6 +4054,9 @@ definitions:
         items:
           $ref: '#/definitions/History'
         description: The history of updates made to the School Bus.
+      CCWData:
+        $ref: '#/definitions/CCWData'
+        description: CCWData for this School Bus
   SchoolBusOwner:
     type: object
     description: Demographic information about companies, organizations, school districts, or individuals who own or lease school buses
@@ -3874,6 +4230,14 @@ definitions:
         type: string
         maxLength: 255
         description: Previous Owners Driver Licence number
+      ICBCLicencePlateNumber:
+        type: string
+        maxLength: 255
+        description: The License Plate Number for the vehicle
+      ICBCVehicleIdentificationNumber:
+        type: string
+        maxLength: 255
+        description:  A code used by the automotive industry to uniquely identify individual motor vehicles. A vehicle identification number is frequently referred to using the acronym VIN and it is occasionally referred to as a chassis number.
       NSCClientNum:
         type: string
         maxLength: 255
@@ -3914,6 +4278,10 @@ definitions:
         type: string
         maxLength: 255
         description: From NSC - The plate decal as defined by NSC on the vehicle
+      dateFetched:
+        type: string
+        format: date-time
+        description: The datetime of when the record was most recently fetched from the upstream CCW service
   Inspection:
     type: object
     description: School Bus inspection details supplementary to the RIP inspection
@@ -3931,6 +4299,7 @@ definitions:
         description: A system-generated unique identifier for an Inspection
       schoolBus:
         $ref: '#/definitions/SchoolBus'
+        description: A foreign key reference to the system-generated unique identifier for a School Bus
       inspector:
         $ref: '#/definitions/User'
         description: Defaults for a new inspection to the current user,  but can be changed as needed.
@@ -3958,6 +4327,14 @@ definitions:
         type: string
         format: date-time
         description: Record creation date and time
+      previousNextInspectionDate:
+        type: string
+        format: date-time
+        description: The next inspection date for the related School Bus prior to the creation of this record
+      previousNextInspectionTypeCode:
+        type: string
+        maxLength: 30
+        description: The next inspection type code for the related School Bus prior to the creation of this record
   Note:
     type: object
     description: Notes entered by users about instance of entities - e.g. School Buses and School Bus Owners
@@ -3982,28 +4359,28 @@ definitions:
     description: Attachments uploaded by users about instance of entities - e.g. School Buses and School Bus Owners
     required:
       - id
-      - internalFileName
-      - externalFileName
     properties:
       id:
         format: int32
         type: integer
         uniqueItems: true
         description: A system-generated unique identifier for an Attachment
-      internalFileName:
+      fileName:
         type: string
         maxLength: 2048
-        uniqueItems: true
-        description: The physical location of the attachment on the file system.
-      externalFileName:
+        description: Filename as passed by the user uploading the file
+      fileContents:
         type: string
-        maxLength: 2048
-        uniqueItems: true
-        description: The name of the attachment as defined by the user in uploading the document.
+        format: binary
+        description: Binary contents of the file
       description:
         type: string
         maxLength: 2048
         description: A note about the attachment,  optionally maintained by the user.
+      type:
+        type: string
+        maxLength: 255
+        description: Type of attachment
   History:
     type: object
     description: The history of updates made to an entity - e.g. a School Bus or a School Bus Owner
@@ -4025,9 +4402,6 @@ definitions:
     description: A table of contacts related to various entities in the system. FK fields are used to link contacts to records in the system.
     required:
       - id
-      - givenName
-      - surname
-      - role
     properties:
       id:
         format: int32
@@ -4042,6 +4416,10 @@ definitions:
         type: string
         maxLength: 50
         description: The surname of the contact.
+      organizationName:
+        type: string
+        maxLength: 150
+        description: The organization name of the contact.
       role:
         type: string
         maxLength: 100
@@ -4050,50 +4428,22 @@ definitions:
         type: string
         maxLength: 150
         description: A note about the contact maintained by the users.
-      contactPhones:
-        type: array
-        items:
-          $ref: '#/definitions/ContactPhone'
-      contactAddresses:
-        type: array
-        items:
-          $ref: '#/definitions/ContactAddress'
-  ContactPhone:
-    type: object
-    description: SB Owner contact phone information
-    required:
-      - id
-      - type
-      - phoneNumber
-    properties:
-      id:
-        format: int32
-        type: integer
-        uniqueItems: true
-        description: A system-generated unique identifier for a ContactPhone
-      type:
+      emailAddress:
         type: string
-        maxLength: 100
-        description: The type of the phone number. UI controlled as to whether it is free form or selected from an enumerated list.  Ex. Home, Cell, Work etc..
-      phoneNumber:
+        maxLength: 255
+        description: The email address for the contact.
+      workPhoneNumber:
         type: string
         maxLength: 20
-        description: The phone number of the contact. Entered as free form to support a range of formats.
-  ContactAddress:
-    type: object
-    description: SB Owner contact address information
-    required:
-      - id
-    properties:
-      id:
-        format: int32
-        type: integer
-        uniqueItems: true
-        description: A system-generated unique identifier for a ContactAddress
-      type:
+        description: The work phone number for the contact.
+      mobilePhoneNumber:
         type: string
-        maxLength: 100
-        description: The type of the address. UI controlled as to whether it is free form or selected from an enumerated list ex. Home, Office, etc..
+        maxLength: 20
+        description: The mobile phone number for the contact.
+      faxPhoneNumber:
+        type: string
+        maxLength: 20
+        description: The fax phone number for the contact.
       address1:
         type: string
         maxLength: 80
@@ -4278,6 +4628,40 @@ definitions:
         type: string
         maxLength: 255
         description: The name of the province of the city
+  CCWJurisdiction:
+    type: object
+    description: The contents of the Jurisdiction table from CCW so that the user can select a Jurisdiction for passing to CCW on certain Out of Province School Bus Web Service calls
+    required:
+      - id
+    properties:
+      id:
+        format: int32
+        type: integer
+        uniqueItems: true
+        description: A system-generated unique identifier for a CCWJurisdiction
+      jurisdictionId:
+        format: int32
+        type: integer
+        description: The CCW system-generated unique identifier for a CCWJurisdiction. Needed for updating the table from CCW if necessary.
+      effectiveDate:
+        type: string
+        format: date-time
+        description: The effective date of the CCWJurisdiction record - NOT CURRENTLY ENFORCED IN SCHOOL BUS
+      expiryDate:
+        type: string
+        format: date-time
+        description: The end date of the CCWJurisdiction record; null if active - NOT CURRENTLY ENFORCED IN SCHOOL BUS
+      activeFlag:
+        type: boolean
+        description: Flag from CCW indicating if the record is still active - Y indicating it is active. NOT CURRENTLY ENFORCED IN SCHOOL BUS
+      code:
+        type: string
+        maxLength: 10
+        description: A short version of the Jurisdiction - the familiar two-letter province or state code
+      description:
+        type: string
+        maxLength: 50
+        description: The full version of the Jurisdiction name.
   Notification:
     type: object
     description: Users associated with specific notifications, created at the time the notification record is created because of the user&#39;s business relationship to the bus - e.g. the user is the currently assigned inspector, or the user is the manager for the District in which the bus is located. The rules for linking a user to a notification for a specific bus could vary over time based on the needs of the business. At minimum, it is expected the current inspector assigned to a bus will be notified of every notification for that bus.
@@ -4291,8 +4675,10 @@ definitions:
         description: A system-generated unique identifier for a Notification
       event:
         $ref: '#/definitions/NotificationEvent'
+        description: A foreign key reference to the system-generated unique identifier for a Notification Event
       event2:
         $ref: '#/definitions/NotificationEvent'
+        description: A foreign key reference to the system-generated unique identifier for a Notification Event
       hasBeenViewed:
         type: boolean
         description: True if the user linked to the inspection has read the notification
@@ -4311,6 +4697,7 @@ definitions:
         description: TO BE REMOVED
       user:
         $ref: '#/definitions/User'
+        description: A foreign key reference to the system-generated unique identifier for a User
   NotificationEvent:
     type: object
     description: Notifications associated about changes (mostly from CCW data) to information related to a specific school bus - e.g. change of owner at ICBC, change in NSC client rating, etc.
@@ -4343,6 +4730,7 @@ definitions:
         description: TO BE REMOVED
       schoolBus:
         $ref: '#/definitions/SchoolBus'
+        description: A foreign key reference to the system-generated unique identifier for a School Bus
   User:
     type: object
     description: Information about the users of the system.
@@ -4396,6 +4784,9 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/GroupMembership'
+      district:
+        $ref: '#/definitions/District'
+        description: The District that the User belongs to
   UserRole:
     type: object
     description: A join table that provides allows each user to have any number of Roles in the system.  At login time the user is given the sum of the permissions of the roles assigned to that user. 
@@ -4417,6 +4808,7 @@ definitions:
         description: The date on which a role previously assigned to a user was removed from that user.
       role:
         $ref: '#/definitions/Role'
+        description: A foreign key reference to the system-generated unique identifier for a Role
   Role:
     type: object
     description: A table managed in the application by authorized users to create named Roles that can be assigned to Users as needed. Roles can be created as needed to support the users of the system and the roles they perform within the organization.
@@ -4457,8 +4849,10 @@ definitions:
         description: A system-generated unique identifier for a RolePermission
       role:
         $ref: '#/definitions/Role'
+        description: A foreign key reference to the system-generated unique identifier for a Role
       permission:
         $ref: '#/definitions/Permission'
+        description: A foreign key reference to the system-generated unique identifier for a Permission
   Permission:
     type: object
     description: The set of permissions defined in the application. Each permission is given a name and triggers some behavior defined in the application. For example, a permission might allow users to see data or to have access to functionality restricted to users without that permission. Permissions are created as needed to the application and are added to the permissions table by data migrations executed at the time the software that uses the permission is deployed.
@@ -4500,8 +4894,10 @@ definitions:
         description: A flag indicating the User is active in the group. Set false to remove the user from the designated group.
       group:
         $ref: '#/definitions/Group'
+        description: A foreign key reference to the system-generated unique identifier for a Group
       user:
         $ref: '#/definitions/User'
+        description: A foreign key reference to the system-generated unique identifier for a User
   Group:
     type: object
     description: A named entity that is used to created a collection of users into a group. For example, the School Bus Inspectors are in the group Inspectors. Groups, like permissions are defined by the application and referenced in the code of the application.
@@ -4522,6 +4918,160 @@ definitions:
         type: string
         maxLength: 255
         description: A description of the group that is presented to the user when they are setting a user into a group.
+  Audit:
+    type: object
+    description: Server generated audit log
+    required:
+      - id
+    properties:
+      id:
+        format: int32
+        type: integer
+        description: A system-generated unique identifier for an Audit
+      appCreateTimestamp:
+        type: string
+        format: date-time
+        description: The date and time of the application action that created the record. 
+      appCreateUserid:
+        type: string
+        description: The user account name of the application user who performed the action that created the record (e.g. JSMITH). This value is not preceded by the directory name. 
+      appCreateUserGuid:
+        type: string
+        description: The Globally Unique Identifier of the application user who performed the action that created the record. This value must be non-NULL if APP_CREATE_USER_DIRECTORY is &#39;IDIR&#39; or &#39;BCEID&#39;, but it must be NULL if APP_CREATE_USER_DIRECTORY is &#39;ORACLE&#39;. APP
+      appCreateUserDirectory:
+        type: string
+        description: The directory in which APP_CREATE_USERID is defined. Valid values are &#39;IDIR&#39;, &#39; BCEID&#39; or &#39;ORACLE&#39;. 
+      appLastUpdateTimestamp:
+        type: string
+        format: date-time
+        description: The date and time of the application action that created or last updated the record.
+      appLastUpdateUserid:
+        type: string
+        description: The Globally Unique Identifier of the application user who performed the action that created the record. This value must be non-NULL if APP_CREATE_USER_DIRECTORY is &#39;IDIR&#39; or &#39;BCEID&#39;, but it must be NULL if APP_CREATE_USER_DIRECTORY is &#39;ORACLE&#39;. APP
+      appLastUpdateUserGuid:
+        type: string
+        description: The Globally Unique Identifier of the application user who performed the action that created or last updated the record. This value must be non-NULL if APP_CREATE_USER_DIRECTORY is &#39;IDIR&#39; or &#39;BCEID&#39;, but it must be NULL if APP_CREATE_USER_DIRECTORY is &#39;ORACLE&#39;. 
+      appLastUpdateUserDirectory:
+        type: string
+        description: The directory in which APP_LAST_UPDATE_USERID is defined. Valid values are &#39;IDIR&#39;, &#39; BCEID&#39; or &#39;ORACLE&#39;. 
+      entityName:
+        type: string
+        description: The name of the entity that has changed
+      entityId:
+        format: int32
+        type: integer
+        description: The primary key in the entity that has changed
+      propertyName:
+        type: string
+        description: The property that has changed
+      oldValue:
+        type: string
+        description: The old value
+      newValue:
+        type: string
+        description: The new value
+      isDelete:
+        type: boolean
+        description: If true the record was deleted
+  HistoryViewModel:
+    type: object
+    x-codegen-viewmodel: true
+    required:
+      - id      
+    properties:
+      id:
+        format: int32
+        type: integer
+        uniqueItems: true
+        description: A system-generated unique identifier for a History
+      historyText:
+        type: string
+        maxLength: 2048
+        description: The text of the history entry tracked against the related entity.
+      lastUpdateUserid:
+        type: string
+        description: Audit information - SM User Id for the User who most recently updated the record.
+      lastUpdateTimestamp:
+        type: string
+        format: date-time
+        description: Audit information - Timestamp for record modification       
+      affectedEntityId:
+        format: int32
+        type: integer
+        description: The primary key of the affected record        
+  AttachmentViewModel:
+    type: object
+    x-codegen-viewmodel: true
+    required:
+      - id      
+    properties:
+      id:
+        format: int32
+        type: integer
+        description: Primary Key
+      fileName:
+        type: string
+        maxLength: 2048
+        description: Filename as passed by the user uploading the file    
+      description:
+        type: string
+        maxLength: 2048
+        description: A note about the attachment,  optionally maintained by the user.
+      type:
+        type: string
+        maxLength: 255
+        description: Type of attachment
+  PermitViewModel:
+    type: object
+    x-codegen-viewmodel: true
+    properties:
+      permitNumber:
+        format: int32
+        type: integer        
+      permitIssueDate:
+        type: string
+      schoolBusOwnerName:
+        type: string
+      schoolBusOwnerAddressLine1:
+        type: string
+      schoolBusOwnerAddressLine2:
+        type: string
+      schoolBusMobilityAidCapacity:
+        type: string
+      schoolBusOwnerCity:
+        type: string
+      schoolBusOwnerProvince:
+        type: string
+      schoolBusOwnerPostalCode:
+        type: string        
+      icbcRegistrationNumber: 
+        type: string
+      vehicleIdentificationNumber:
+        type: string
+      icbcModelYear:
+        format: int32
+        type: integer
+      icbcMake:
+        type: string
+      restrictionsText:
+        type: string
+      schoolDistrictshortName:
+        type: string
+      schoolBusSeatingCapacity:
+        format: int32
+        type: integer
+      unitNumber:
+        type: string
+        maxLength: 30
+        description: The unit number of the Bus as defined by the School Bus owner - freeform text.     
+      permitClassCode:
+        type: string
+        maxLength: 50
+        description: The enumerated class of School Bus from drop down
+      bodyTypeCode:
+        type: string
+        maxLength: 50
+        description: The enumerated body type of the School Bus from drop down       
   SchoolBusOwnerViewModel:
     type: object
     x-codegen-viewmodel: true
@@ -4576,6 +5126,9 @@ definitions:
         format: int32
         type: integer
         description: The number of buses for which this owner is associated with       
+      nextInspectionTypeCode:
+        type: string
+        description: Type Code for the Next InspectionType.  Null if there are no next inspections.
   UserViewModel:
     type: object
     x-codegen-viewmodel: true
@@ -4594,28 +5147,61 @@ definitions:
         x-chance-type: name
       surname:
         type: string
-        x-chance-type: name
-      initials:
-        type: string
+        x-chance-type: name      
       email:
         type: string
         x-chance-type: email
       active:
         type: boolean
+      smUserId:
+        type: string
+      userRoles:
+        type: array
+        items:
+          $ref: '#/definitions/UserRole'
+      groupMemberships:
+        type: array
+        items:
+          $ref: '#/definitions/GroupMembership'
+      district:
+        $ref: '#/definitions/District'
+        description: The District to which this User is affliated.
   CurrentUserViewModel:
     type: object
     x-codegen-viewmodel: true
     properties:
+      id:
+        format: int32
+        type: integer
+        x-type-options:
+          min: 1
+          max: 1000
       givenName:
         type: string
         x-chance-type: name
       surname:
         type: string
-        x-chance-type: name
-      fullName:
+        x-chance-type: name      
+      email:
         type: string
-      districtName:
+        x-chance-type: email
+      active:
+        type: boolean
+      userRoles:
+        type: array
+        items:
+          $ref: '#/definitions/UserRole'
+      smUserId:
         type: string
+      smAuthorizationDirectory:
+        type: string
+      groupMemberships:
+        type: array
+        items:
+          $ref: '#/definitions/GroupMembership'
+      district:
+        $ref: '#/definitions/District'
+        description: The District to which this User is affliated.
       overdueInspections:
         format: int32
         type: integer
@@ -4623,6 +5209,9 @@ definitions:
         format: int32
         type: integer
       dueNextMonthInspections:
+        format: int32
+        type: integer
+      reInspections:
         format: int32
         type: integer
   UserDetailsViewModel:
@@ -4681,6 +5270,12 @@ definitions:
         x-type-options:
           min: 1
           max: 1000
+      userId:
+        format: int32
+        type: integer
+        x-type-options:
+          min: 1
+          max: 1000
   RoleViewModel:
     type: object
     x-codegen-viewmodel: true
@@ -4734,6 +5329,12 @@ definitions:
       - name
       - description
     properties:
+      id:
+        format: int32
+        type: integer
+        x-type-options:
+          min: 1
+          max: 1000
       code:
         type: string
       name:
@@ -4809,12 +5410,9 @@ definitions:
         x-chance-type: word
       isDefault:
         type: boolean
-      favouriteContextTypeId:
-        format: int32
-        type: integer
-        x-type-options:
-          min: 1
-          max: 1000
+      type:
+        type: string
+        description:  Type of favourite        
   NotificationViewModel:
     type: object
     x-codegen-viewmodel: true

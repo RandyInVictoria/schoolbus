@@ -22,6 +22,7 @@ using Swashbuckle.SwaggerGen.Annotations;
 using SchoolBusAPI.Models;
 using SchoolBusAPI.ViewModels;
 using SchoolBusAPI.Services;
+using SchoolBusAPI.Authorization;
 
 namespace SchoolBusAPI.Controllers
 {
@@ -48,6 +49,7 @@ namespace SchoolBusAPI.Controllers
         [HttpPost]
         [Route("/api/groups/bulk")]
         [SwaggerOperation("GroupsBulkPost")]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult GroupsBulkPost([FromBody]Group[] items)
         {
             return this._service.GroupsBulkPostAsync(items);
@@ -61,6 +63,7 @@ namespace SchoolBusAPI.Controllers
         [Route("/api/groups")]
         [SwaggerOperation("GroupsGet")]
         [SwaggerResponse(200, type: typeof(List<Group>))]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult GroupsGet()
         {
             return this._service.GroupsGetAsync();
@@ -75,6 +78,7 @@ namespace SchoolBusAPI.Controllers
         [HttpPost]
         [Route("/api/groups/{id}/delete")]
         [SwaggerOperation("GroupsIdDeletePost")]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult GroupsIdDeletePost([FromRoute]int id)
         {
             return this._service.GroupsIdDeletePostAsync(id);
@@ -90,6 +94,7 @@ namespace SchoolBusAPI.Controllers
         [Route("/api/groups/{id}")]
         [SwaggerOperation("GroupsIdGet")]
         [SwaggerResponse(200, type: typeof(Group))]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult GroupsIdGet([FromRoute]int id)
         {
             return this._service.GroupsIdGetAsync(id);
@@ -106,6 +111,7 @@ namespace SchoolBusAPI.Controllers
         [Route("/api/groups/{id}")]
         [SwaggerOperation("GroupsIdPut")]
         [SwaggerResponse(200, type: typeof(Group))]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult GroupsIdPut([FromRoute]int id, [FromBody]Group item)
         {
             return this._service.GroupsIdPutAsync(id, item);
@@ -120,7 +126,7 @@ namespace SchoolBusAPI.Controllers
         [HttpGet]
         [Route("/api/groups/{id}/users")]
         [SwaggerOperation("GroupsIdUsersGet")]
-        [SwaggerResponse(200, type: typeof(List<User>))]
+        [SwaggerResponse(200, type: typeof(List<UserViewModel>))]
         public virtual IActionResult GroupsIdUsersGet([FromRoute]int id)
         {
             return this._service.GroupsIdUsersGetAsync(id);
@@ -135,6 +141,7 @@ namespace SchoolBusAPI.Controllers
         [Route("/api/groups")]
         [SwaggerOperation("GroupsPost")]
         [SwaggerResponse(200, type: typeof(Group))]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult GroupsPost([FromBody]Group item)
         {
             return this._service.GroupsPostAsync(item);

@@ -20,13 +20,14 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SchoolBusAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 
 namespace SchoolBusAPI.Services.Impl
 { 
     /// <summary>
     /// 
     /// </summary>
-    public class InspectionService : IInspectionService
+    public class InspectionService : ServiceBase, IInspectionService
     {
 
         private readonly DbAppContext _context;
@@ -34,15 +35,15 @@ namespace SchoolBusAPI.Services.Impl
         /// <summary>
         /// Create a service and set the database context
         /// </summary>
-        public InspectionService (DbAppContext context)
+        public InspectionService(IHttpContextAccessor httpContextAccessor, DbAppContext context) : base(httpContextAccessor, context)
         {
-            _context = context;
+            _context = context;            
         }
-	
+
         /// <summary>
         /// 
         /// </summary>
-        
+
         /// <param name="body"></param>
         /// <response code="201">Inspections created</response>
 
@@ -92,7 +93,7 @@ namespace SchoolBusAPI.Services.Impl
                 else
                 {
                     // Inspection has a special field, createdDate which is set to now.
-                    item.CreatedDate = DateTime.Now;
+                    item.CreatedDate = DateTime.UtcNow;
                     _context.Inspections.Add(item);
                 }                
             }
@@ -135,15 +136,41 @@ namespace SchoolBusAPI.Services.Impl
         {
             var exists = _context.Inspections.Any(a => a.Id == id);
             if (exists)
-            {
-                var item = _context.Inspections.First(a => a.Id == id);
-                if (item != null)
+            {                
+                var item = _context.Inspections.Include(x => x.SchoolBus).First(a => a.Id == id);
+                // Delete Inspection has special behavior.
+                // By design, an Inspector is only able to delete an Inspection 24 hours after it has been entered.
+                // Also, the related Schoolbus will be updated with the value of the PreviousNextInspectionDate and PreviousNextInspectionType fields.
+
+                // first check to see if we are allowed to delete.
+                if (item.CreatedDate > DateTime.UtcNow.AddDays(-1))
                 {
-                    _context.Inspections.Remove(item);
+                    // update the Schoolbus record.
+                    if (item.SchoolBus != null)
+                    {
+                        int schoolbusId = item.SchoolBus.Id;
+
+                        bool schoolbus_exists = _context.SchoolBuss.Any(x => x.Id == schoolbusId);
+                        if (schoolbus_exists)
+                        {
+                            SchoolBus schoolbus = _context.SchoolBuss.First(x => x.Id == schoolbusId);
+                            schoolbus.NextInspectionDate = item.PreviousNextInspectionDate;
+                            schoolbus.NextInspectionTypeCode = item.PreviousNextInspectionTypeCode;
+                            _context.Update(schoolbus);
+                        }                        
+                    }
+
+                    _context.Inspections.Remove(item);                    
+
                     // Save the changes
                     _context.SaveChanges();
-                }            
-                return new ObjectResult(item);
+                    return new ObjectResult(item);
+                }
+                else
+                {
+                    // forbidden
+                    return new StatusCodeResult(403);
+                }                                                               
             }
             else
             {
@@ -229,7 +256,7 @@ namespace SchoolBusAPI.Services.Impl
             var exists = _context.Inspections.Any(a => a.Id == id);
             if (exists && id == item.Id)
             {
-                _context.Inspections.Update(item);
+                _context.Inspections.Update(item);                                
                 // Save the changes
                 _context.SaveChanges();
                 return new ObjectResult(item);
@@ -240,6 +267,8 @@ namespace SchoolBusAPI.Services.Impl
                 return new StatusCodeResult(404);
             }
         }
+ 
+
         /// <summary>
         /// 
         /// </summary>
@@ -281,6 +310,13 @@ namespace SchoolBusAPI.Services.Impl
                     }
                 }
 
+                // set the Inspection's Previous Next Inspection Date and to the SchoolBus Next Inspection Date
+                if (item.SchoolBus != null)
+                {
+                    item.PreviousNextInspectionDate = item.SchoolBus.NextInspectionDate;
+                    item.PreviousNextInspectionTypeCode = item.SchoolBus.NextInspectionTypeCode;
+                }
+
                 var exists = _context.Inspections.Any(a => a.Id == item.Id);
                 if (exists)
                 {
@@ -292,11 +328,10 @@ namespace SchoolBusAPI.Services.Impl
                 else
                 {
                     // Inspection has a special field, createdDate which is set to now.
-                    item.CreatedDate = DateTime.Now;
+                    item.CreatedDate = DateTime.UtcNow;
                     _context.Inspections.Add(item);
                 }
-
-                _context.SaveChanges();
+                _context.SaveChanges();                                
                 return new ObjectResult(item);
 
             }            

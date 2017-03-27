@@ -137,7 +137,6 @@ namespace CCW.Controllers
         [Route("GetCCW")]
         public virtual IActionResult GetCCW([FromQuery] string regi, [FromQuery] string plate, [FromQuery] string vin)
         {                        
-
             // check we have the right headers.
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(guid) || string.IsNullOrEmpty(directory))
             {
@@ -152,6 +151,18 @@ namespace CCW.Controllers
             VehicleDescription vehicle = null;
             if (regi != null)
             {
+                // format the regi.
+                try
+                {
+                    int registration = int.Parse(regi);
+                    // zero padded, 8 digits
+                    regi = registration.ToString("D8");
+                } 
+                catch (Exception e)
+                {
+                    _logger.LogInformation("Exception occured parsing registration number " + regi);
+                }
+
                 try
                 {
                     vehicle = _service.GetBCVehicleForRegistrationNumber(regi, userId, guid, directory);
@@ -232,18 +243,46 @@ namespace CCW.Controllers
                 ccwdata.ICBCRegOwnerProv = vehicle.owner.mailingAddress4;
                 ccwdata.ICBCRegOwnerRODL = vehicle.owner.driverLicenseNumber;
                 ccwdata.ICBCSeatingCapacity = SanitizeInt(vehicle.seatingCapacity);
-                ccwdata.ICBCVehicleType = vehicle.vehicleType;
+                ccwdata.ICBCVehicleType = vehicle.vehicleType + " - " + vehicle.vehicleTypeDescription;
                 
                 ccwdata.ICBCVehicleIdentificationNumber = vehicle.serialNumber;
 
                 ccwdata.NSCPlateDecal = vehicle.decalNumber;
                 ccwdata.NSCPolicyEffectiveDate = vehicle.policyStartDate;
                 ccwdata.NSCPolicyExpiryDate = vehicle.policyExpiryDate;
-                ccwdata.NSCPolicyStatus = vehicle.policyStatus;
-                ccwdata.NSCPolicyStatusDate = vehicle.policyAcquiredCurrentStatusDate;
-                ccwdata.NSCPolicyNumber = vehicle.nscNumber;
-                // get the nsc client organization data.
+                ccwdata.NSCPolicyStatus = vehicle.policyStatus + " - " + vehicle.policyStatusDescription;
 
+                // policyAquiredCurrentStatusDate is the preferred field, however it is often null.
+                if (vehicle.policyAcquiredCurrentStatusDate != null)
+                {
+                    ccwdata.NSCPolicyStatusDate = vehicle.policyAcquiredCurrentStatusDate;
+                }
+                else if (vehicle.policyTerminationDate != null)
+                {
+                    ccwdata.NSCPolicyStatusDate = vehicle.policyTerminationDate;
+                }
+                else if (vehicle.policyReplacedOnDate != null)
+                {
+                    ccwdata.NSCPolicyStatusDate = vehicle.policyReplacedOnDate;
+                }
+                else if (vehicle.policyStartDate != null)
+                {
+                    ccwdata.NSCPolicyStatusDate = vehicle.policyStartDate;
+                }                
+                
+                if (vehicle.owner != null)
+                {
+                    ccwdata.ICBCRegOwnerRODL = vehicle.owner.driverLicenseNumber;                    
+                }                
+                ccwdata.ICBCLicencePlateNumber = vehicle.policyNumber;
+                // these fields are the same.
+                ccwdata.NSCPolicyNumber = vehicle.policyNumber;
+                ccwdata.NSCClientNum = vehicle.nscNumber; 
+
+                ccwdata.DateFetched = DateTime.UtcNow;
+
+                // get the nsc client organization data.
+                
                 bool foundNSCData = false;
 
                 if (!string.IsNullOrEmpty(ccwdata.NSCPolicyNumber)) 
@@ -251,12 +290,11 @@ namespace CCW.Controllers
                     string organizationNameCode = "LE";
                     try
                     {
-                        ClientOrganization clientOrganization = _service.GetCurrentClientOrganization(ccwdata.NSCPolicyNumber, organizationNameCode, userId, guid, directory);
+                        ClientOrganization clientOrganization = _service.GetCurrentClientOrganization(ccwdata.NSCClientNum, organizationNameCode, userId, guid, directory);
                         foundNSCData = true;
                         ccwdata.NSCCarrierConditions = clientOrganization.nscInformation.carrierStatus;
-                        ccwdata.NSCCarrierName = clientOrganization.name1;
+                        ccwdata.NSCCarrierName = clientOrganization.displayName;                        
                         ccwdata.NSCCarrierSafetyRating = clientOrganization.nscInformation.safetyRating;
-                        ccwdata.NSCClientNum = clientOrganization.nscInformation.certificationNumber;
                     }
                     catch (AggregateException ae)
                     {
@@ -286,12 +324,11 @@ namespace CCW.Controllers
                     {
                         try
                         {
-                            ClientIndividual clientIndividual = _service.GetCurrentClientIndividual(ccwdata.NSCPolicyNumber, organizationNameCode, userId, guid, directory);
+                            ClientIndividual clientIndividual = _service.GetCurrentClientIndividual(ccwdata.NSCClientNum, organizationNameCode, userId, guid, directory);
                             foundNSCData = true;
                             ccwdata.NSCCarrierConditions = clientIndividual.nscInformation.carrierStatus;
                             ccwdata.NSCCarrierName = clientIndividual.displayName;
                             ccwdata.NSCCarrierSafetyRating = clientIndividual.nscInformation.safetyRating;
-                            ccwdata.NSCClientNum = clientIndividual.nscInformation.certificationNumber;
                         }
                         catch (AggregateException ae)
                         {
@@ -315,39 +352,18 @@ namespace CCW.Controllers
                             _logger.LogInformation("Unknown Error retrieving Individual NSC data.");
                         }
                     }
+                }                               
 
+                if (ccwdata.Id > 0)
+                {
+                    _context.Update(ccwdata);
                 }
+                else
+                {
+                    _context.Add(ccwdata);
+                }
+                _context.SaveChanges();
                 
-                // get the ICBC data
-
-                try
-                {
-                    IcbcVehicleDescription icbcVehicleDescription = _service.GetIcbcVehicleForRegistrationNumberAsync(vehicle.registrationNumber, DateTime.Now, userId, guid, directory);
-                    ccwdata.ICBCRegOwnerRODL = icbcVehicleDescription.regularOperatorLicenceNumber;
-                    ccwdata.ICBCLicencePlateNumber = icbcVehicleDescription.plateNumber;
-                    ccwdata.ICBCRegOwnerStatus = "";                    
-                }
-                catch (AggregateException ae)
-                {
-                    _logger.LogInformation("Aggregate Exception occured during GetIcbcVehicleForRegistrationNumberAsync");
-                    ae.Handle((x) =>
-                    {
-                        if (x is FaultException<CVSECommonException>) // From the web service.
-                        {
-                            _logger.LogDebug("CVSECommonException:");
-                            FaultException<CVSECommonException> fault = (FaultException<CVSECommonException>)x;
-                            _logger.LogDebug("errorId: {0}", fault.Detail.errorId);
-                            _logger.LogDebug("errorMessage: {0}", fault.Detail.errorMessage);
-                            _logger.LogDebug("systemError: {0}", fault.Detail.systemError);
-                            return true;
-                        }
-                        return true; // ignore other exceptions
-                    });
-                }
-                catch (Exception e)
-                {
-                    _logger.LogDebug("Unknown error retrieving ICBC information.");
-                }
 
                 return new ObjectResult(ccwdata);
             }

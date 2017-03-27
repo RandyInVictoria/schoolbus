@@ -19,6 +19,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using SchoolBusAPI.Models;
 
 namespace SchoolBusAPI.Models
 {
@@ -27,7 +28,7 @@ namespace SchoolBusAPI.Models
     /// </summary>
         [MetaDataExtension (Description = "Demographic information about companies, organizations, school districts, or individuals who own or lease school buses")]
 
-    public partial class SchoolBusOwner : IEquatable<SchoolBusOwner>
+    public partial class SchoolBusOwner : AuditableEntity, IEquatable<SchoolBusOwner>
     {
         /// <summary>
         /// Default constructor, required by entity framework
@@ -108,9 +109,11 @@ namespace SchoolBusAPI.Models
         
         /// <summary>
         /// Foreign key for PrimaryContact 
-        /// </summary>       
+        /// </summary>   
         [ForeignKey("PrimaryContact")]
-        public int? PrimaryContactRefId { get; set; }
+		[JsonIgnore]
+		[MetaDataExtension (Description = "Link to the designated Primary Contact for the Inspector to the School Bus Owner organization.")]
+        public int? PrimaryContactId { get; set; }
         
         /// <summary>
         /// The District to which this School Bus is affliated.
@@ -121,9 +124,11 @@ namespace SchoolBusAPI.Models
         
         /// <summary>
         /// Foreign key for District 
-        /// </summary>       
+        /// </summary>   
         [ForeignKey("District")]
-        public int? DistrictRefId { get; set; }
+		[JsonIgnore]
+		[MetaDataExtension (Description = "The District to which this School Bus is affliated.")]
+        public int? DistrictId { get; set; }
         
         /// <summary>
         /// The set of contacts related to the School Bus Owner.

@@ -104,7 +104,7 @@ namespace SchoolBusAPI.Services.Impl
         /// 
         /// </summary>
 
-        /// <param name="body"></param>
+        /// <param name="items"></param>
         /// <response code="201">SchoolBusOwners created</response>
 
         public virtual IActionResult SchoolbusownersBulkPostAsync (SchoolBusOwner[] items)        
@@ -140,7 +140,14 @@ namespace SchoolBusAPI.Services.Impl
 
         public virtual IActionResult SchoolbusownersGetAsync ()        
         {
-            var result = _context.SchoolBusOwners.ToList();
+            var result = _context.SchoolBusOwners
+                .Include(x => x.Attachments)
+                .Include(x => x.Contacts)
+                .Include(x => x.District.Region)
+                .Include(x => x.History)
+                .Include(x => x.Notes)
+                .Include(x => x.PrimaryContact)
+                .ToList();
             return new ObjectResult(result);
         }
         /// <summary>
@@ -155,8 +162,10 @@ namespace SchoolBusAPI.Services.Impl
             var exists = _context.SchoolBusOwners.Any(a => a.Id == id);
             if (exists)
             {
-                SchoolBusOwner schoolBusOwner = _context.SchoolBusOwners.First(a => a.Id == id);
-                var result = schoolBusOwner.Notes;
+                SchoolBusOwner schoolBusOwner = _context.SchoolBusOwners
+                    .Include(x => x.Attachments)                    
+                    .First(a => a.Id == id);
+                var result = MappingExtensions.GetAttachmentListAsViewModel(schoolBusOwner.Attachments);
                 return new ObjectResult(result);
             }
             else
@@ -165,69 +174,8 @@ namespace SchoolBusAPI.Services.Impl
                 return new StatusCodeResult(404);
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <remarks>Returns address contacts for a particular SchoolBusOwner</remarks>
-        /// <param name="id">id of SchoolBusOwner to fetch contact address for</param>
-        /// <response code="200">OK</response>
-
-        public virtual IActionResult SchoolbusownersIdContactaddressesGetAsync (int id)        
-        {
-            var exists = _context.SchoolBusOwners.Any(a => a.Id == id);
-            if (exists)
-            {
-                List<ContactAddress> result = new List<ContactAddress>();
-                var owner = _context.SchoolBusOwners.Where(a => a.Id == id).First();
-                var contacts = owner.Contacts;
-                foreach (Contact contact in contacts)
-                {
-                    // merge the lists
-                    result = result.Concat ( contact.ContactAddresses).ToList();
-                }
-                return new ObjectResult(result);
-            }
-            else
-            {
-                // record not found
-                return new StatusCodeResult(404);
-            }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <remarks>Returns phone contacts for a particular SchoolBusOwner</remarks>
-        /// <param name="id">id of SchoolBusOwner to fetch contact phone for</param>
-        /// <response code="200">OK</response>
-
-        public virtual IActionResult SchoolbusownersIdContactphonesGetAsync (int id)        
-        {
-            var exists = _context.SchoolBusOwners.Any(a => a.Id == id);
-            if (exists)
-            {
-                List<ContactPhone> result = new List<ContactPhone>();
-                var owner = _context.SchoolBusOwners.Where(a => a.Id == id).First();
-                var contacts = owner.Contacts;
-                foreach (Contact contact in contacts)
-                {
-                    // merge the lists
-                    result = result.Concat(contact.ContactPhones).ToList();
-                }
-                return new ObjectResult(result);                
-            }
-            else
-            {
-                // record not found
-                return new StatusCodeResult(404);
-            }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
         
-        /// <param name="id">id of SchoolBusOwner to delete</param>
-        /// <response code="200">OK</response>
-        /// <response code="404">SchoolBusOwner not found</response>
+        
 
         public virtual IActionResult SchoolbusownersIdDeletePostAsync (int id)        
         {
@@ -258,7 +206,14 @@ namespace SchoolBusAPI.Services.Impl
             var exists = _context.SchoolBusOwners.Any(a => a.Id == id);
             if (exists)
             {
-                var result = _context.SchoolBusOwners.First(a => a.Id == id);
+                var result = _context.SchoolBusOwners
+                    .Include(x => x.Attachments)
+                    .Include(x => x.Contacts)
+                    .Include(x => x.District.Region)
+                    .Include(x => x.History)
+                    .Include(x => x.Notes)
+                    .Include(x => x.PrimaryContact)                    
+                    .First(a => a.Id == id);
                 return new ObjectResult(result);
             }
             else
@@ -267,6 +222,80 @@ namespace SchoolBusAPI.Services.Impl
                 return new StatusCodeResult(404);
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>Returns History for a particular SchoolBusOwner</remarks>
+        /// <param name="id">id of SchoolBusOwner to fetch History for</param>
+        /// <response code="200">OK</response>
+        public virtual IActionResult SchoolbusownersIdHistoryGetAsync(int id, int? offset, int? limit)
+        {
+            bool exists = _context.SchoolBusOwners.Any(a => a.Id == id);
+            if (exists)
+            {
+                SchoolBusOwner schoolBusOwner = _context.SchoolBusOwners
+                    .Include(x => x.History)
+                    .First(a => a.Id == id);
+
+                List<History> data = schoolBusOwner.History.OrderByDescending(y => y.LastUpdateTimestamp).ToList();
+
+                if (offset == null)
+                {
+                    offset = 0;
+                }
+                if (limit == null)
+                {
+                    limit = data.Count() - offset;
+                }
+                List<HistoryViewModel> result = new List<HistoryViewModel>();
+
+                for (int i = (int)offset; i < data.Count() && i < offset + limit; i++)
+                {
+                    result.Add(data[i].ToViewModel(id));
+                }
+
+                return new ObjectResult(result);
+            }
+            else
+            {
+                // record not found
+                return new StatusCodeResult(404);
+            }
+
+        }
+
+        public virtual IActionResult SchoolbusownersIdHistoryPostAsync(int id, History item)
+        {
+            HistoryViewModel result = new HistoryViewModel();
+
+            bool exists = _context.SchoolBusOwners.Any(a => a.Id == id);
+            if (exists)
+            {
+                SchoolBusOwner schoolBusOwner = _context.SchoolBusOwners
+                    .Include(x => x.History)
+                    .First(a => a.Id == id);
+                if (schoolBusOwner.History == null)
+                {
+                    schoolBusOwner.History = new List<History>();
+                }
+                // force add
+                item.Id = 0;
+                schoolBusOwner.History.Add(item);
+                
+                _context.SchoolBusOwners.Update(schoolBusOwner);
+                _context.SaveChanges();
+            }
+
+            result.HistoryText = item.HistoryText;
+            result.Id = item.Id;
+            result.LastUpdateTimestamp = item.LastUpdateTimestamp;
+            result.LastUpdateUserid = item.LastUpdateUserid;
+            result.AffectedEntityId = id;
+
+            return new ObjectResult(result);
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -279,7 +308,9 @@ namespace SchoolBusAPI.Services.Impl
             var exists = _context.SchoolBusOwners.Any(a => a.Id == id);
             if (exists)
             {
-                SchoolBusOwner schoolBusOwner = _context.SchoolBusOwners.First(a => a.Id == id);
+                SchoolBusOwner schoolBusOwner = _context.SchoolBusOwners
+                    .Include(x => x.Notes)
+                    .First(a => a.Id == id);
                 var result = schoolBusOwner.Notes;
                 return new ObjectResult(result);
             }
@@ -326,10 +357,10 @@ namespace SchoolBusAPI.Services.Impl
             DateTime? result = null;
 
             // next inspection is drawn from the schoolbus table
-            bool exists = _context.SchoolBuss.Any(x => x.SchoolBusOwner.Id == schoolBusOwnerId);
+            bool exists = _context.SchoolBuss.Any(x => x.SchoolBusOwner.Id == schoolBusOwnerId && x.NextInspectionDate != null && x.Status.ToLower() == "active");
             if (exists)
             {
-                SchoolBus schoolbus = _context.SchoolBuss.Where(x => x.SchoolBusOwner.Id == schoolBusOwnerId)
+                SchoolBus schoolbus = _context.SchoolBuss.Where(x => x.SchoolBusOwner.Id == schoolBusOwnerId && x.NextInspectionDate != null && x.Status.ToLower() == "active")
                     .OrderByDescending(x => x.NextInspectionDate)
                     .First();
                 result = schoolbus.NextInspectionDate;
@@ -350,9 +381,26 @@ namespace SchoolBusAPI.Services.Impl
             bool exists = _context.SchoolBuss.Any(x => x.SchoolBusOwner.Id == schoolBusOwnerId);
             if (exists)
             {
-                result = _context.SchoolBuss.Where(x => x.SchoolBusOwner.Id == schoolBusOwnerId)
+                result = _context.SchoolBuss.Where(x => x.SchoolBusOwner.Id == schoolBusOwnerId && x.Status.ToLower() == "active")
                     .Count();
                 
+            }
+            return result;
+        }
+
+        private string GetNextInspectionTypeCode(int schoolBusOwnerId)
+        {
+            string result = null;
+
+            // next inspection is drawn from the inspections table.
+            bool exists = _context.SchoolBuss.Any(x => x.SchoolBusOwner.Id == schoolBusOwnerId && x.NextInspectionDate != null && x.Status.ToLower() == "active");
+            if (exists)
+            {
+                var record = _context.SchoolBuss
+                    .Where(x => x.SchoolBusOwner.Id == schoolBusOwnerId && x.NextInspectionDate != null && x.Status.ToLower() == "active")
+                    .OrderByDescending(x => x.NextInspectionDate)
+                    .First();
+                result = record.NextInspectionTypeCode;                
             }
             return result;
         }
@@ -368,10 +416,11 @@ namespace SchoolBusAPI.Services.Impl
             if (exists)
             {
                 SchoolBusOwner schoolBusOwner = _context.SchoolBusOwners.First(a => a.Id == id);
-                var result = schoolBusOwner.ToViewModel();
+                SchoolBusOwnerViewModel result = schoolBusOwner.ToViewModel();
                 // populate the calculated fields.
-                result.nextInspectionDate = GetNextInspectionDate(id); ;
-                result.numberOfBuses = GetNumberSchoolBuses(id);
+                result.NextInspectionDate = GetNextInspectionDate(id); ;
+                result.NumberOfBuses = GetNumberSchoolBuses(id);
+                result.NextInspectionTypeCode = GetNextInspectionTypeCode(id);
                 return new ObjectResult(result);
             }
             else
@@ -391,7 +440,7 @@ namespace SchoolBusAPI.Services.Impl
         public virtual IActionResult SchoolbusownersPostAsync (SchoolBusOwner body)        
         {
             AdjustSchoolBusOwner(body);
-            body.DateCreated = DateTime.Now;
+            body.DateCreated = DateTime.UtcNow;
             _context.SchoolBusOwners.Add(body);
             _context.SaveChanges();
             return new ObjectResult(body);
@@ -506,8 +555,9 @@ namespace SchoolBusAPI.Services.Impl
             foreach (SchoolBusOwnerViewModel item in result)
             {                
                 // populate the calculated fields.
-                item.nextInspectionDate = GetNextInspectionDate(item.Id); ;
-                item.numberOfBuses = GetNumberSchoolBuses(item.Id);                
+                item.NextInspectionDate = GetNextInspectionDate(item.Id); ;
+                item.NumberOfBuses = GetNumberSchoolBuses(item.Id);
+                item.NextInspectionTypeCode = GetNextInspectionTypeCode(item.Id);              
             }
             return new ObjectResult(result);
         }

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SchoolBusAPI.Models;
+using System;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
@@ -81,7 +82,12 @@ namespace SchoolBusAPI.Authentication
         {
             get
             {
-                return this.Request.Headers[Options.SiteMinderUserGuidKey];
+                string result = this.Request.Headers[Options.SiteMinderUserGuidKey];                
+                if (!string.IsNullOrEmpty(result))
+                {
+                    result = result.Trim();
+                }
+                return result;
             }
         }
 
@@ -92,9 +98,21 @@ namespace SchoolBusAPI.Authentication
                 string smUserId = this.Request.Headers[Options.SiteMinderUserNameKey];
                 if (string.IsNullOrEmpty(smUserId))
                 {
-                    smUserId = this.Request.Headers[Options.SiteMinderUniversalIdKey];
+                    smUserId = this.Request.Headers[Options.SiteMinderUniversalIdKey];                    
                 }
+                if (!string.IsNullOrEmpty(smUserId))
+                {
+                    smUserId = smUserId.Trim();
 
+                    // sometimes the site minder user ID contains the authorization directory.
+
+                    string idir = "IDIR\\";
+                    if (smUserId.Length >= idir.Length && smUserId.Substring(0, idir.Length).ToUpper() == idir)
+                    {
+                        smUserId = smUserId.Substring(idir.Length);
+                    }
+                }
+              
                 return smUserId;
             }
         }
@@ -105,11 +123,18 @@ namespace SchoolBusAPI.Authentication
             string username = this.SiteMinderUserId;
             string siteMinderGuid = this.SiteMinderGuid;
 
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(siteMinderGuid))
+            if (string.IsNullOrEmpty(username))
             {
                 // Defer to another layer ...
-                _logger.LogWarning($"Missing one or the other or both of username and guid!");
-                return Task.FromResult(AuthenticateResult.Fail("Missing required authentication information!"));
+                _logger.LogWarning($"Missing username");
+                return Task.FromResult(AuthenticateResult.Fail("Missing SiteMinder UserId!"));
+            }
+
+            if (string.IsNullOrEmpty(siteMinderGuid))
+            {
+                // Defer to another layer ...
+                _logger.LogWarning($"Missing guid!");
+                return Task.FromResult(AuthenticateResult.Fail("Missing SiteMinder Guid!"));
             }
 
             var user = _context.LoadUser(username, siteMinderGuid);

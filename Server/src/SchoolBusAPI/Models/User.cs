@@ -19,6 +19,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using SchoolBusAPI.Models;
 
 namespace SchoolBusAPI.Models
 {
@@ -27,7 +28,7 @@ namespace SchoolBusAPI.Models
     /// </summary>
         [MetaDataExtension (Description = "Information about the users of the system.")]
 
-    public partial class User : IEquatable<User>
+    public partial class User : AuditableEntity, IEquatable<User>
     {
         /// <summary>
         /// Default constructor, required by entity framework
@@ -167,9 +168,11 @@ namespace SchoolBusAPI.Models
         
         /// <summary>
         /// Foreign key for District 
-        /// </summary>       
+        /// </summary>   
         [ForeignKey("District")]
-        public int? DistrictRefId { get; set; }
+		[JsonIgnore]
+		[MetaDataExtension (Description = "The District that the User belongs to")]
+        public int? DistrictId { get; set; }
         
         /// <summary>
         /// Returns the string presentation of the object

@@ -1,5 +1,5 @@
 #school-buses-list {
-  #school-buses-search {
+  #school-buses-filters {
     margin-top: -10px;
 
     > div {
@@ -46,15 +46,12 @@
 
   #school-buses-faves {
     float: right;
-    margin-top: 10px;
-  }
-
-  #school-buses-faves-dropdown {
-    width: 79px;
   }
 
   #search-button {
-    float:right;
+    float: right;
+    width: 105px;
+    margin-top: 10px;
   }
 }
 
@@ -63,15 +60,58 @@
     margin-bottom: 10px;
   }
 
+  #school-buses-keys {
+    margin-left: 20px;
+  }
+
+  #school-buses-data {
+    .col-display-label {
+      width: 140px;
+    }
+  }
+
   #inspection-list {
-    height: 216px;
+    height: 271px;
     width: 100%;
     overflow-y: scroll;
     margin-bottom: 10px;
   }
 
+  #school-buses-policy {
+    .col-display-label {
+      width: 140px;
+    }
+  }
+
   #school-buses-icbc-owner {
     min-height: 80px;
+
+    .col-display-label {
+      width: 60px;
+    }
+  }
+
+  #school-buses-nsc {
+    .col-display-label {
+      width: 145px;
+    }
+  }
+
+  #school-buses-icbc-vehicle {
+    .col-display-label {
+      width: 120px;
+    }
+  }
+
+  #school-buses-ccw-fetched {
+    float: right;
+    font-size: 13px;
+    font-style: italic;
+    padding-right: 5px;
+  }
+
+  #issued-date {
+    font-size: 60%;
   }
 
   .well {
@@ -98,6 +138,14 @@
     margin-left: -1px;
   }
 
+  .alert {
+    top-margin: 10px;
+
+    .btn {
+      float: right;
+    }
+  }
+
   h1 {
     small {
       font-size: 85%;
@@ -116,13 +164,50 @@
 }
 
 #school-buses-add {
+  #school-buses-ccw {
+    margin-top: 15px;
+  }
+
+  #school-buses-top {
+    font-size: 13.5px;
+    padding-top: 20px;
+    border-top: 1px solid lightgray;
+
+    .col-display-field {
+      padding-left: 5px !important;
+      padding-right: 10px;
+    }
+  }
+
+  #school-buses-icbc-owner {
+    min-height: 80px;
+
+    .col-display-label {
+      width: 55px;
+    }
+  }
+
+  #school-buses-icbc-vehicle {
+    .col-display-label {
+      width: 110px;
+    }
+  }
+
+  #school-buses-ccw-fetched {
+    float: right;
+    font-size: 12.5px;
+    font-style: italic;
+    margin-top: 10px;
+    padding-right: 5px;
+  }
+
   .well {
     margin-top: 20px;
     margin-bottom: 0px;
   }
 
   .modal-dialog {
-    width: 460px;
+    width: 500px;
   }
 
   .btn-toolbar {
@@ -143,9 +228,6 @@
     }
   }
 
-  .modal-footer {
-  }
-
   .spinner {
     position: absolute;
     top: 20px;
@@ -159,6 +241,10 @@
 }
 
 #inspection-edit {
+  .modal-dialog {
+    width: 650px;;
+  }
+
   #notes {
     height: 106px;
   }

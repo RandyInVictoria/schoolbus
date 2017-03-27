@@ -2,9 +2,8 @@ import React from 'react';
 
 import { connect } from 'react-redux';
 
-import { Well, Alert, Row, Col } from 'react-bootstrap';
+import { PageHeader, Well, Alert, Row, Col } from 'react-bootstrap';
 import { ButtonToolbar, Button, ButtonGroup, Glyphicon } from 'react-bootstrap';
-import { LinkContainer } from 'react-router-bootstrap';
 
 import _ from 'lodash';
 import Moment from 'moment';
@@ -17,29 +16,20 @@ import store from '../store';
 
 import BadgeLabel from '../components/BadgeLabel.jsx';
 import CheckboxControl from '../components/CheckboxControl.jsx';
-import Confirm from '../components/Confirm.jsx';
 import DateControl from '../components/DateControl.jsx';
+import DeleteButton from '../components/DeleteButton.jsx';
 import DropdownControl from '../components/DropdownControl.jsx';
+import EditButton from '../components/EditButton.jsx';
 import Favourites from '../components/Favourites.jsx';
 import FilterDropdown from '../components/FilterDropdown.jsx';
 import KeySearchControl from '../components/KeySearchControl.jsx';
 import MultiDropdown from '../components/MultiDropdown.jsx';
-import OverlayTrigger from '../components/OverlayTrigger.jsx';
 import SortTable from '../components/SortTable.jsx';
 import Spinner from '../components/Spinner.jsx';
+import Unimplemented from '../components/Unimplemented.jsx';
 
-import { formatDateTime } from '../utils/date';
+import { formatDateTime, toZuluTime } from '../utils/date';
 
-/*
-
-* System default should be:
-** If user is an inspector, Inspector == Current User else not used
-** If the user is not an inspector, Districts in home district, else not used
-
-TODO:
-* Print / Email
-
-*/
 
 const BEFORE_TODAY = 'Before Today';
 const BEFORE_END_OF_MONTH = 'Before End of Month';
@@ -90,6 +80,7 @@ var SchoolBuses = React.createClass({
         endDate: this.props.search.endDate || '',
         hideInactive: this.props.search.hideInactive !== false,
         justReInspections: this.props.search.justReInspections === true,
+        loaded: this.props.search.loaded === true,
       },
 
       ui : {
@@ -167,10 +158,10 @@ var SchoolBuses = React.createClass({
     }
 
     if (startDate && startDate.isValid()) {
-      searchParams.startDate = startDate.format('YYYY-MM-DDT00:00:00');
+      searchParams.startDate = toZuluTime(startDate.startOf('day'));
     }
     if (endDate && endDate.isValid()) {
-      searchParams.endDate = endDate.format('YYYY-MM-DDT00:00:00');
+      searchParams.endDate = toZuluTime(endDate.startOf('day'));
     }
 
     return searchParams;
@@ -202,19 +193,13 @@ var SchoolBuses = React.createClass({
           hideInactive: true,
           justReInspections: false,
         };
-/*
-
-Overdue: Next Inspections before today, inspector = current user
-Re-Inspections: Next inspections all dates, inspector = current user, inspection type = re-inspections
-Upcoming inspections: Next inspections - before the next 30 day, inspector = current user
-
-*/
 
         if (this.props.location.query[Constant.SCHOOL_BUS_OWNER_QUERY]) {
           var ownerId = this.props.location.query[Constant.SCHOOL_BUS_OWNER_QUERY];
           state.ownerId = parseInt(ownerId, 10);
           state.ownerName = this.props.owners[ownerId] ? this.props.owners[ownerId].name : '';
           state.nextInspection = ALL;
+          state.selectedInspectorsIds = [];
         } else if (this.props.location.query[Constant.SCHOOL_BUS_OVERDUE_QUERY]) {
           state.nextInspection = BEFORE_TODAY;
         } else if (this.props.location.query[Constant.SCHOOL_BUS_REINSPECTIONS_QUERY]) {
@@ -231,23 +216,27 @@ Upcoming inspections: Next inspections - before the next 30 day, inspector = cur
           var favourite = _.find(this.props.favourites, (favourite) => { return favourite.isDefault; });
           if (favourite) {
             this.loadFavourite(favourite);
-            return;
           }
         }
-        this.fetch();
+        return this.fetch();
       }
+    }).finally(() => {
+      this.setState({ loading: false });
     });
   },
 
   fetch() {
     this.setState({ loading: true });
-    Api.searchSchoolBuses(this.buildSearchParams()).finally(() => {
+    return Api.searchSchoolBuses(this.buildSearchParams()).finally(() => {
       this.setState({ loading: false });
     });
   },
 
   updateSearchState(state, callback) {
-    this.setState({ search: { ...this.state.search, ...state, ...{ loaded: true } }}, () =>{
+    // Initializing the KeySearchControl causes a state change which we want to catch here by checking
+    // state.keySearchOnMount; otherwise this will flag the search state as loaded before it actually is.
+    var loaded = state.keySearchOnMount ? {} : { loaded: true };
+    this.setState({ search: { ...this.state.search, ...state, ...loaded }}, () =>{
       store.dispatch({ type: Action.UPDATE_BUSES_SEARCH, schoolBuses: this.state.search });
       if (callback) { callback(); }
     });
@@ -285,12 +274,24 @@ Upcoming inspections: Next inspections - before the next 30 day, inspector = cur
     var schoolDistricts = _.sortBy(this.props.schoolDistricts, 'name');
     var owners = _.sortBy(this.props.owners, 'name');
 
+    var numBuses = this.state.loading ? '...' : Object.keys(this.props.schoolBuses).length;
+
     return <div id="school-buses-list">
+      <PageHeader>School Buses ({ numBuses })
+        <ButtonGroup id="school-buses-buttons">
+          <Unimplemented>
+            <Button onClick={ this.email }><Glyphicon glyph="envelope" title="E-mail" /></Button>
+          </Unimplemented>
+          <Unimplemented>
+            <Button onClick={ this.print }><Glyphicon glyph="print" title="Print" /></Button>
+          </Unimplemented>
+        </ButtonGroup>
+      </PageHeader>
       <Well id="school-buses-bar" bsSize="small" className="clearfix">
         <Row>
-          <Col md={11}>
+          <Col md={10}>
             <Row>
-              <ButtonToolbar id="school-buses-search">
+              <ButtonToolbar id="school-buses-filters">
                 <MultiDropdown id="selectedDistrictsIds" placeholder="Districts"
                   items={ districts } selectedIds={ this.state.search.selectedDistrictsIds } updateState={ this.updateSearchState } showMaxItems={ 2 } />
                 <MultiDropdown id="selectedInspectorsIds" placeholder="Inspectors"
@@ -299,7 +300,7 @@ Upcoming inspections: Next inspections - before the next 30 day, inspector = cur
                   items={ cities } selectedIds={ this.state.search.selectedCitiesIds } updateState={ this.updateSearchState } showMaxItems={ 2 } />
                 <MultiDropdown id="selectedSchoolDistrictsIds" placeholder="School Districts"
                   items={ schoolDistricts } selectedIds={ this.state.search.selectedSchoolDistrictsIds } fieldName="shortName" updateState={ this.updateSearchState } showMaxItems={ 2 } />
-                <FilterDropdown id="ownerId" placeholder="Owner" blankLine
+                <FilterDropdown id="ownerId" placeholder="Owner" blankLine="(All)"
                   items={ owners } selectedId={ this.state.search.ownerId } updateState={ this.updateSearchState } />
                 <KeySearchControl id="school-buses-key-search" search={ this.state.search } updateState={ this.updateSearchState }/>
               </ButtonToolbar>
@@ -312,26 +313,22 @@ Upcoming inspections: Next inspections - before the next 30 day, inspector = cur
                 {(() => {
                   if (this.state.search.nextInspection === CUSTOM) {
                     return <span>
-                      <DateControl id="startDate" date={ this.state.search.startDate } updateState={ this.updateSearchState } placeholder="mm/dd/yyyy" label="From:" title="start date"/>
-                      <DateControl id="endDate" date={ this.state.search.endDate } updateState={ this.updateSearchState } placeholder="mm/dd/yyyy" label="To:" title="end date"/>
+                      <DateControl id="startDate" date={ this.state.search.startDate } updateState={ this.updateSearchState } placeholder="mm/dd/yyyy" label="From:" title="Start Date"/>
+                      <DateControl id="endDate" date={ this.state.search.endDate } updateState={ this.updateSearchState } placeholder="mm/dd/yyyy" label="To:" title="End date"/>
                     </span>;
                   }
                 })()}
                 <CheckboxControl inline id="hideInactive" checked={ this.state.search.hideInactive } updateState={ this.updateSearchState }>Hide Inactive</CheckboxControl>
                 <CheckboxControl inline id="justReInspections" checked={ this.state.search.justReInspections } updateState={ this.updateSearchState }>Just Re-Inspections</CheckboxControl>
-                <Button id="search-button" bsStyle="primary" onClick={ this.fetch }>Search</Button>
               </ButtonToolbar>
             </Row>
           </Col>
-          <Col md={1}>
-            <Row id="school-buses-buttons">
-              <ButtonGroup>
-                <Button onClick={ this.email }><Glyphicon glyph="envelope" title="E-mail" /></Button>
-                <Button onClick={ this.print }><Glyphicon glyph="print" title="Print" /></Button>
-              </ButtonGroup>
-            </Row>
+          <Col md={2}>
             <Row id="school-buses-faves">
               <Favourites id="school-buses-faves-dropdown" type="schoolBus" favourites={ this.props.favourites } data={ this.state.search } onSelect={ this.loadFavourite } pullRight />
+            </Row>
+            <Row id="school-buses-search">
+              <Button id="search-button" bsStyle="primary" onClick={ this.fetch }>Search</Button>
             </Row>
           </Col>
         </Row>
@@ -351,35 +348,30 @@ Upcoming inspections: Next inspections - before the next 30 day, inspector = cur
             { field: 'districtName',           title: 'District'        },
             { field: 'homeTerminalCityPostal', title: 'Home Terminal'   },
             { field: 'icbcRegistrationNumber', title: 'Registration'    },
-            { field: 'unitNumber',             title: 'Fleet Unit #'    },
+            { field: 'unitNumber',             title: 'Unit Number'     },
             { field: 'permitNumber',           title: 'Permit'          },
             { field: 'nextInspectionDateSort', title: 'Next Inspection' },
             { field: 'inspectorName',          title: 'Inspector'       },
-            { field: 'blank' },
+            { field: 'details', noSort: true,  title: 'Details'         },
         ]}>
           {
             _.map(schoolBuses, (bus) => {
               return <tr key={ bus.id } className={ bus.isActive ? null : 'info' }>
-                <td><a href={ bus.ownerPath }>{ bus.ownerName }</a></td>
+                <td><a href={ bus.ownerURL }>{ bus.ownerName }</a></td>
                 <td>{ bus.districtName }</td>
                 <td>{ bus.homeTerminalCityPostal }</td>
-                <td>{ bus.icbcRegistrationNumber }</td>
+                <td>{ bus.canView ? <a href={ bus.url }>{ bus.icbcRegistrationNumber }</a> : bus.icbcRegistrationNumber }</td>
                 <td>{ bus.unitNumber }</td>
                 <td>{ bus.permitNumber }</td>
-                <td>{ formatDateTime(bus.nextInspectionDate, 'MM/DD/YYYY') }
+                <td>{ formatDateTime(bus.nextInspectionDate, Constant.DATE_SHORT_MONTH_DAY_YEAR) }
                   { bus.isReinspection ? <BadgeLabel bsStyle="info">R</BadgeLabel> : null }
                   { bus.isOverdue ? <BadgeLabel bsStyle="danger">!</BadgeLabel> : null }
                 </td>
                 <td>{ bus.inspectorName }</td>
                 <td style={{ textAlign: 'right' }}>
                   <ButtonGroup>
-                    <OverlayTrigger trigger="click" placement="top" rootClose overlay={ <Confirm onConfirm={ this.delete.bind(this, bus) }/> }>
-                      <Button className={ bus.canDelete ? '' : 'hidden' } title="deleteBus" bsSize="xsmall"><Glyphicon glyph="trash" /></Button>
-                    </OverlayTrigger>
-                    <LinkContainer to={{ pathname: 'school-buses/' + bus.id }}>
-                      <Button className={ bus.canEdit ? '' : 'hidden' } title="editBus" bsSize="xsmall"><Glyphicon glyph="edit" /></Button>
-                    </LinkContainer>
-
+                    <DeleteButton name="Bus" hide={ !bus.canDelete } onConfirm={ this.delete.bind(this, bus) }/>
+                    <EditButton name="Bus" hide={ !bus.canView } view pathname={ bus.path }/>
                   </ButtonGroup>
                 </td>
               </tr>;

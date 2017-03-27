@@ -16,7 +16,8 @@ var FilterDropdown = React.createClass({
     fieldName: React.PropTypes.string,
     placeholder: React.PropTypes.string,
     // If blankLine is supplied, include an "empty" line at the top;
-    blankLine: React.PropTypes.bool,
+    // If it has a string value, use that in place of blank.
+    blankLine: React.PropTypes.any,
     disabled: React.PropTypes.bool,
     onSelect: React.PropTypes.func,
     updateState: React.PropTypes.func,
@@ -24,7 +25,7 @@ var FilterDropdown = React.createClass({
 
   getInitialState() {
     return {
-      selectedId: this.props.selectedId || '',
+      selectedId: this.props.selectedId || 0,
       title: '',
       filterTerm: '',
       fieldName: this.props.fieldName || 'name',
@@ -120,7 +121,7 @@ var FilterDropdown = React.createClass({
     return <Dropdown className={ `filter-dropdown ${this.props.className || ''}` } id={ this.props.id } title={ this.state.title }
       disabled={ this.props.disabled } open={ this.state.open } onToggle={ this.toggle }
     >
-      <Dropdown.Toggle title={this.state.title} />
+      <Dropdown.Toggle title={ this.state.title } />
       <RootCloseMenu bsRole="menu">
         <Well bsSize="small">
           <FormControl type="text" placeholder="Search" onChange={ this.filter } inputRef={ ref => { this.input = ref; }}/>
@@ -129,13 +130,13 @@ var FilterDropdown = React.createClass({
           <ul>
             { this.props.blankLine && this.state.filterTerm.length === 0 &&
               <MenuItem key={ 0 } eventKey={ 0 } onSelect={ this.itemSelected }>
-                  &nbsp;
+                { typeof this.props.blankLine === 'string' ? this.props.blankLine : ' ' }
               </MenuItem>
             }
             {
               _.map(items, item => {
                 return <MenuItem key={ item.id } eventKey={ item.id } onSelect={ this.itemSelected }>
-                    { item[this.state.fieldName] }
+                  { item[this.state.fieldName] }
                 </MenuItem>;
               })
             }

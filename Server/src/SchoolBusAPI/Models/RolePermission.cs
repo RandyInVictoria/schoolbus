@@ -19,6 +19,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using SchoolBusAPI.Models;
 
 namespace SchoolBusAPI.Models
 {
@@ -27,7 +28,7 @@ namespace SchoolBusAPI.Models
     /// </summary>
         [MetaDataExtension (Description = "The collection of permissions included in a role.")]
 
-    public partial class RolePermission : IEquatable<RolePermission>
+    public partial class RolePermission : AuditableEntity, IEquatable<RolePermission>
     {
         /// <summary>
         /// Default constructor, required by entity framework
@@ -41,8 +42,8 @@ namespace SchoolBusAPI.Models
         /// Initializes a new instance of the <see cref="RolePermission" /> class.
         /// </summary>
         /// <param name="Id">A system-generated unique identifier for a RolePermission (required).</param>
-        /// <param name="Role">Role.</param>
-        /// <param name="Permission">Permission.</param>
+        /// <param name="Role">A foreign key reference to the system-generated unique identifier for a Role.</param>
+        /// <param name="Permission">A foreign key reference to the system-generated unique identifier for a Permission.</param>
         public RolePermission(int Id, Role Role = null, Permission Permission = null)
         {   
             this.Id = Id;
@@ -58,26 +59,34 @@ namespace SchoolBusAPI.Models
         public int Id { get; set; }
         
         /// <summary>
-        /// Gets or Sets Role
+        /// A foreign key reference to the system-generated unique identifier for a Role
         /// </summary>
+        /// <value>A foreign key reference to the system-generated unique identifier for a Role</value>
+        [MetaDataExtension (Description = "A foreign key reference to the system-generated unique identifier for a Role")]
         public Role Role { get; set; }
         
         /// <summary>
         /// Foreign key for Role 
-        /// </summary>       
+        /// </summary>   
         [ForeignKey("Role")]
-        public int? RoleRefId { get; set; }
+		[JsonIgnore]
+		[MetaDataExtension (Description = "A foreign key reference to the system-generated unique identifier for a Role")]
+        public int? RoleId { get; set; }
         
         /// <summary>
-        /// Gets or Sets Permission
+        /// A foreign key reference to the system-generated unique identifier for a Permission
         /// </summary>
+        /// <value>A foreign key reference to the system-generated unique identifier for a Permission</value>
+        [MetaDataExtension (Description = "A foreign key reference to the system-generated unique identifier for a Permission")]
         public Permission Permission { get; set; }
         
         /// <summary>
         /// Foreign key for Permission 
-        /// </summary>       
+        /// </summary>   
         [ForeignKey("Permission")]
-        public int? PermissionRefId { get; set; }
+		[JsonIgnore]
+		[MetaDataExtension (Description = "A foreign key reference to the system-generated unique identifier for a Permission")]
+        public int? PermissionId { get; set; }
         
         /// <summary>
         /// Returns the string presentation of the object

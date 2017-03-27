@@ -262,7 +262,7 @@ namespace SchoolBusAPI.Test
             schoolbus.SchoolBusOwner = schoolBusOwner;
             schoolbus.VehicleIdentificationNumber = "1234";
             schoolbus.LicencePlateNumber = "12345";
-            DateTime nextInspection = DateTime.Now.ToUniversalTime();
+            DateTime nextInspection = DateTime.UtcNow;
             schoolbus.NextInspectionDate = nextInspection;
 
             jsonString = schoolbus.ToJson();
@@ -376,10 +376,10 @@ namespace SchoolBusAPI.Test
             SchoolBusOwnerViewModel model = JsonConvert.DeserializeObject<SchoolBusOwnerViewModel>(jsonString);
 
             // should be one bus.
-            Assert.Equal(model.numberOfBuses, 1);
-            Assert.Equal(model.nextInspectionDate.Value.Hour, nextInspection.Hour);
-            Assert.Equal(model.nextInspectionDate.Value.Minute, nextInspection.Minute);
-            Assert.Equal(model.nextInspectionDate.Value.Second, nextInspection.Second);            
+            Assert.Equal(model.NumberOfBuses, 1);
+            Assert.Equal(model.NextInspectionDate.Value.Hour, nextInspection.Hour);
+            Assert.Equal(model.NextInspectionDate.Value.Minute, nextInspection.Minute);
+            Assert.Equal(model.NextInspectionDate.Value.Second, nextInspection.Second);            
 
             // teardown
             request = new HttpRequestMessage(HttpMethod.Post, "/api/schoolbuses/" + id + "/delete");

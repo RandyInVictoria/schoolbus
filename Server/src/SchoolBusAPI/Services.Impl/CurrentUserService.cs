@@ -218,28 +218,32 @@ namespace SchoolBusAPI.Services.Impl
                 result.Surname = User.FindFirst(ClaimTypes.Surname).Value;
 
                 int overdue = _context.SchoolBuss
-                .Where(x => x.Inspector.Id == id)
-                .Where(x => x.NextInspectionDate <= DateTime.Now)
+                
+                .Where(x => x.Inspector.Id == id && x.NextInspectionDate <= DateTime.UtcNow && x.Status.ToLower() == "active")
                 .Select(x => x)
                 .Count();
 
                 int nextMonth = _context.SchoolBuss
-                    .Where(x => x.Inspector.Id == id)
-                    .Where(x => x.NextInspectionDate >= DateTime.Now)
-                    .Where(x => x.NextInspectionDate <= DateTime.Now.AddMonths(1))
+                    .Where(x => x.Inspector.Id == id && x.NextInspectionDate <= DateTime.UtcNow.AddMonths(1) && x.Status.ToLower() == "active")
                     .Select(x => x)
                     .Count();
 
-                int scheduledInspections = _context.Inspections
-                    .Where(x => x.Inspector.Id == id)
-                    .Where(x => x.InspectionDate >= DateTime.Now)
+                int scheduledInspections = _context.SchoolBuss
+                    .Where(x => x.Inspector.Id == id && x.NextInspectionDate >= DateTime.UtcNow && x.Status.ToLower() == "active")
                     .Select(x => x)
                     .Count();
 
+                int reInspections = _context.SchoolBuss
+                    .Where(x => x.Inspector.Id == id)
+                    .Where(x => x.NextInspectionTypeCode == "Re-Inspection")                    
+                    .Select(x => x)
+                    .Count();
 
                 result.OverdueInspections = overdue;
                 result.DueNextMonthInspections = nextMonth;                
                 result.ScheduledInspections = scheduledInspections;
+                result.ReInspections = reInspections;
+
 
                 return new ObjectResult(result);
             }            

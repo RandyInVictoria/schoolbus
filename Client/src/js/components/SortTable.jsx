@@ -26,7 +26,7 @@ var SortTable = React.createClass({
 
   render() {
     return <div id={ this.props.id }>
-      <Table condensed striped>
+      <Table condensed striped hover>
         <thead>
           <tr>
             {
@@ -39,7 +39,7 @@ var SortTable = React.createClass({
                 if (this.props.sortField === header.field) {
                   sortGlyph = <span>&nbsp;<Glyphicon glyph={ this.props.sortDesc ? 'sort-by-attributes-alt' : 'sort-by-attributes' }/></span>;
                 }
-                return <th id={ header.field } key={ header.field } onClick={ this.sort } style={{ ...header.style, cursor: 'pointer' }}>{ header.title }{ sortGlyph }</th>;
+                return <th id={ header.field } key={ header.field } onClick={ header.noSort ? '' : this.sort } style={{ ...header.style, cursor: 'pointer' }}>{ header.title }{ sortGlyph }</th>;
               })
             }
           </tr>

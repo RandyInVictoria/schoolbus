@@ -80,8 +80,19 @@ namespace SchoolBusAPI.Services
         /// </summary>
         /// <remarks>Returns History for a particular SchoolBus</remarks>
         /// <param name="id">id of SchoolBus to fetch History for</param>
+        /// <param name="offset">offset for records that are returned</param>
+        /// <param name="limit">limits the number of records returned.</param>
         /// <response code="200">OK</response>
-        IActionResult SchoolbusesIdHistoryGetAsync(int id);
+        IActionResult SchoolbusesIdHistoryGetAsync(int id, int? offset, int? limit);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>Add a History record to the SchoolBus</remarks>
+        /// <param name="id">id of SchoolBus to fetch History for</param>
+        /// <param name="item"></param>
+        /// <response code="201">History created</response>
+        IActionResult SchoolbusesIdHistoryPostAsync(int id, History item);
 
         /// <summary>
         /// 
@@ -94,11 +105,27 @@ namespace SchoolBusAPI.Services
         /// <summary>
         /// 
         /// </summary>
+        /// <remarks>Obtains a new permit number for the indicated Schoolbus.  Returns the updated SchoolBus record.</remarks>
+        /// <param name="id">id of SchoolBus to obtain a new permit number for</param>
+        /// <response code="200">OK</response>
+        IActionResult SchoolbusesIdNewpermitPutAsync(int id);
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <remarks>Returns notes for a particular SchoolBus.</remarks>
         /// <param name="id">id of SchoolBus to fetch notes for</param>
         /// <response code="200">OK</response>
         /// <response code="404">SchoolBus not found</response>
         IActionResult SchoolbusesIdNotesGetAsync(int id);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>Returns a PDF version of the permit for the selected Schoolbus</remarks>
+        /// <param name="id">id of SchoolBus to obtain the PDF permit for</param>
+        /// <response code="200">OK</response>
+        IActionResult SchoolbusesIdPdfpermitGetAsync(int id);
 
         /// <summary>
         /// 

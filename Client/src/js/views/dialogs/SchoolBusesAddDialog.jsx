@@ -10,10 +10,10 @@ import _ from 'lodash';
 
 import * as Action from '../../actionTypes';
 import * as Api from '../../api';
+import * as Constant from '../../constants';
 import store from '../../store';
 
-import ColField from '../../components/ColField.jsx';
-import ColLabel from '../../components/ColLabel.jsx';
+import ColDisplay from '../../components/ColDisplay.jsx';
 import ModalDialog from '../../components/ModalDialog.jsx';
 import KeySearchControl from '../../components/KeySearchControl.jsx';
 import Spinner from '../../components/Spinner.jsx';
@@ -35,7 +35,7 @@ var SchoolBusAddDialog = React.createClass({
 
   getInitialState() {
     return {
-      loading: 0,
+      loading: false,
 
       search: {
         keySearchField: this.props.search.keySearchField,
@@ -63,9 +63,7 @@ var SchoolBusAddDialog = React.createClass({
   fetch() {
     if (this.state.search.keySearchParams) {
       this.setState({
-        // Need to count the "loads" because we've got more than one call and
-        // don't want to stop the spinner prematurely.
-        loading: 1,
+        loading: true,
         busInSystemId: 0,
         ccwFound: false,
         ccwError: false,
@@ -76,8 +74,7 @@ var SchoolBusAddDialog = React.createClass({
             busInSystemId: _.first(_.keys(this.props.schoolBuses)),
           });
         } else {
-          this.setState({ loading: this.state.loading + 1 });
-          Api.searchCCW(this.state.search.keySearchParams).then(() => {
+          return Api.searchCCW(this.state.search.keySearchParams).then(() => {
             var found = this.props.schoolBusCCW.icbcRegistrationNumber ? true : false;
             this.setState({
               ccwFound: found,
@@ -95,23 +92,21 @@ var SchoolBusAddDialog = React.createClass({
               ccwFound: false,
               ccwError: true,
             });
-          }).finally(() => {
-            this.setState({ loading: this.state.loading - 1 });
           });
         }
       }).finally(() => {
-        this.setState({ loading: this.state.loading - 1 });
+        this.setState({ loading: false });
       });
     }
   },
 
   render() {
-    return <ModalDialog id="school-buses-add" show={ this.props.show } onClose={ this.props.onClose }
+    return <ModalDialog id="school-buses-add" show={ this.props.show } onClose={ this.props.onClose } backdrop="static"
       title={ <strong>Add School Bus</strong> }
       footer={
         this.state.ccwFound &&
-          <LinkContainer to={{ pathname: 'school-buses/0' }}>
-            <Button title="add bus">Continue</Button>
+          <LinkContainer to={{ pathname: `${ Constant.BUSES_PATHNAME }/0` }}>
+            <Button title="Add Bus">Continue</Button>
           </LinkContainer>
       }
     >
@@ -119,7 +114,7 @@ var SchoolBusAddDialog = React.createClass({
         return <div>
           <Row>
             <ButtonToolbar>
-              <KeySearchControl id="school-buses-key-search" search={ this.state.search } updateState={ this.updateSearchState } />
+              <KeySearchControl id="school-buses-key-search" search={ this.state.search } updateState={ this.updateSearchState } suppressPlate />
               <ButtonGroup>
                 <Button id="close-button" onClick={ this.props.onClose }>Close</Button>
                 <Button id="search-button" bsStyle="primary" onClick={ this.fetch }>Search</Button>
@@ -133,7 +128,7 @@ var SchoolBusAddDialog = React.createClass({
               return <div>
                 <Row className="has-error">
                   <span>This bus is already in the Inspection Tracking System.</span>
-                  <LinkContainer to={{ pathname: 'school-buses/' + this.state.busInSystemId }}>
+                  <LinkContainer to={{ pathname: `${ Constant.BUSES_PATHNAME }/${ this.state.busInSystemId }` }}>
                     <Button title="view bus" bsSize="xsmall"><Glyphicon glyph="edit" /></Button>
                   </LinkContainer>
                 </Row>
@@ -151,7 +146,12 @@ var SchoolBusAddDialog = React.createClass({
             if (this.state.ccwFound) {
               var ccw = this.props.schoolBusCCW;
 
-              return <div id="school-bus-ccw">
+              return <div id="school-buses-ccw">
+                <Row id="school-buses-top">
+                  <ColDisplay label="Registration">{ ccw.icbcRegistrationNumber || <span>&nbsp;</span> }</ColDisplay>
+                  <ColDisplay label="Plate">{ ccw.icbcLicencePlateNumber || <span>&nbsp;</span> }</ColDisplay>
+                  <ColDisplay label="VIN">{ ccw.icbcVehicleIdentificationNumber || <span>&nbsp;</span> }</ColDisplay>
+                </Row>
                 <Row>
                   <Well>
                     <h3>ICBC Registered Owner</h3>
@@ -161,14 +161,11 @@ var SchoolBusAddDialog = React.createClass({
 
                       return <div id="school-buses-icbc-owner">
                         <Row>
-                          <ColLabel md={2}>Owner</ColLabel>
-                          <ColField md={6}>{ ccw.icbcRegOwnerName }</ColField>
-                          <ColLabel md={2}>Status Is</ColLabel>
-                          <ColField md={2}>{ ccw.icbcRegOwnerStatus }</ColField>
+                          <ColDisplay md={8} label="Owner">{ ccw.icbcRegOwnerName }</ColDisplay>
+                          <ColDisplay md={4} label="Status">{ ccw.icbcRegOwnerStatus }</ColDisplay>
                         </Row>
                         <Row>
-                          <ColLabel md={2}>Address</ColLabel>
-                          <ColField md={6}>{(() => {
+                          <ColDisplay md={8} label="Address">{(() => {
                             if (ccw.icbcRegOwnerAddr1 && ccw.icbcRegOwnerAddr2 && city) {
                               return <div>{ ccw.icbcRegOwnerAddr1 }<br />{ ccw.icbcRegOwnerAddr2 }<br />{ city }</div>;
                             }
@@ -179,9 +176,8 @@ var SchoolBusAddDialog = React.createClass({
                               return <div>{ ccw.icbcRegOwnerAddr1 }{ ccw.icbcRegOwnerAddr2 }<br />{ city }</div>;
                             }
                             return <div>{ ccw.icbcRegOwnerAddr1 }{ ccw.icbcRegOwnerAddr2 }</div>;
-                          })()}</ColField>
-                          <ColLabel md={2}>RODL #<br />PODL #</ColLabel>
-                          <ColField md={2}>{ ccw.icbcRegOwnerRODL }<br />{ ccw.icbcRegOwnerPODL }</ColField>
+                          })()}</ColDisplay>
+                          <ColDisplay md={4} label={ <span>RODL #<br />PODL #</span> }>{ ccw.icbcRegOwnerRODL }<br />{ ccw.icbcRegOwnerPODL }</ColDisplay>
                         </Row>
                       </div>;
                     })()}
@@ -193,66 +189,56 @@ var SchoolBusAddDialog = React.createClass({
                     {(() => {
                       return <div id="school-buses-icbc-vehicle">
                        <Row>
-                          <ColLabel md={3}>Year</ColLabel>
-                          <ColField md={3}>{ ccw.icbcModelYear }</ColField>
-                          <ColLabel md={3}>GVW</ColLabel>
-                          <ColField md={3}>{ ccw.icbcGrossVehicleWeight }</ColField>
+                          <ColDisplay md={6} label="Year">{ ccw.icbcModelYear }</ColDisplay>
+                          <ColDisplay md={6} label="GVW">{ ccw.icbcGrossVehicleWeight }</ColDisplay>
                         </Row>
                         <Row>
-                          <ColLabel md={3}>Vehicle Type</ColLabel>
-                          <ColField md={3}>{ ccw.icbcVehicleType }</ColField>
-                          <ColLabel md={3}>Make</ColLabel>
-                          <ColField md={3}>{ ccw.icbcMake }</ColField>
-                        </Row>
-                        <Row>
-                          <ColLabel md={3}>Rate Class</ColLabel>
-                          <ColField md={3}>{ ccw.icbcRateClass }</ColField>
-                          <ColLabel md={3}>Body</ColLabel>
-                          <ColField md={3}>{ ccw.icbcBody }</ColField>
-                        </Row>
-                        <Row>
-                          <ColLabel md={3}>CVIP Decal</ColLabel>
-                          <ColField md={3}>{ ccw.icbccvipDecal }</ColField>
-                          <ColLabel md={3}>Rebuilt Status</ColLabel>
-                          <ColField md={3}>{ ccw.icbcRebuiltStatus }</ColField>
-                        </Row>
-                        <Row>
-                          <ColLabel md={3}>Fleet Unit #</ColLabel>
-                          <ColField md={3}>{ ccw.icbcFleetUnitNo }</ColField>
-                          <ColLabel md={3}>CVIP Expiry</ColLabel>
-                          <ColField md={3}>{ formatDateTime(ccw.icbccvipExpiry, 'YYYY-MMM-DD') }</ColField>
-                        </Row>
-                        <Row>
-                          <ColLabel md={3}>Net Wt</ColLabel>
-                          <ColField md={3}>{ ccw.icbcNetWt }</ColField>
+                          <ColDisplay md={6} label="Net Wt">{ ccw.icbcNetWt }</ColDisplay>
                           <Col md={6}></Col>
                         </Row>
                         <Row>
-                          <ColLabel md={3}>Model</ColLabel>
-                          <ColField md={3}>{ ccw.icbcModel }</ColField>
-                          <ColLabel md={3}>Colour</ColLabel>
-                          <ColField md={3}>{ ccw.icbcColour }</ColField>
+                          <ColDisplay md={6} label="Vehicle Type">{ ccw.icbcVehicleType }</ColDisplay>
+                          <ColDisplay md={6} label="Make">{ ccw.icbcMake }</ColDisplay>
                         </Row>
                         <Row>
-                          <ColLabel md={3}>Fuel</ColLabel>
-                          <ColField md={3}>{ ccw.icbcFuel }</ColField>
+                          <ColDisplay md={6} label="Model">{ ccw.icbcModel }</ColDisplay>
+                          <ColDisplay md={6} label="Colour">{ ccw.icbcColour }</ColDisplay>
+                        </Row>
+                        <Row>
+                          <ColDisplay md={6} label="Rate Class">{ ccw.icbcRateClass }</ColDisplay>
+                          <ColDisplay md={6} label="Body">{ ccw.icbcBody }</ColDisplay>
+                        </Row>
+                        <Row>
+                          <ColDisplay md={6} label="Fuel">{ ccw.icbcFuel }</ColDisplay>
                           <Col md={6}></Col>
                         </Row>
                         <Row>
-                          <ColLabel md={3}>Seating Capacity</ColLabel>
-                          <ColField md={3}>{ ccw.icbcSeatingCapacity }</ColField>
+                          <ColDisplay md={6} label="CVIP Decal">{ ccw.icbccvipDecal }</ColDisplay>
+                          <ColDisplay md={6} label="Rebuilt Status">{ ccw.icbcRebuiltStatus }</ColDisplay>
+                        </Row>
+                        <Row>
+                          <ColDisplay md={6} label="Seating Capacity">{ ccw.icbcSeatingCapacity }</ColDisplay>
                           <Col md={6}></Col>
                         </Row>
                         <Row>
-                          <ColLabel md={3}>N&amp;O</ColLabel>
-                          <ColField md={3}>{ ccw.icbcNotesAndOrders }</ColField>
-                          <ColLabel md={3}>Ordered On</ColLabel>
-                          <ColField md={3}>{ formatDateTime(ccw.icbcOrderedOn, 'YYYY-MMM-DD') }</ColField>
+                          <ColDisplay md={6} label="Fleet Unit #">{ ccw.icbcFleetUnitNo }</ColDisplay>
+                          <ColDisplay md={6} label="CVIP Expiry">{ formatDateTime(ccw.icbccvipExpiry, Constant.DATE_SHORT_MONTH_DAY_YEAR) }</ColDisplay>
+                        </Row>
+                        <Row>
+                          <ColDisplay md={6} label="N&amp;O">{ ccw.icbcNotesAndOrders }</ColDisplay>
+                          <ColDisplay md={6} label="Ordered On">{ formatDateTime(ccw.icbcOrderedOn, Constant.DATE_SHORT_MONTH_DAY_YEAR) }</ColDisplay>
                         </Row>
                       </div>;
                     })()}
                   </Well>
                 </Row>
+                { ccw.dateFetched &&
+                  <Row>
+                    <Col md={12}>
+                      <span id="school-buses-ccw-fetched">ICBC data last fetched on { formatDateTime(ccw.dateFetched, Constant.DATE_TIME_READABLE) }</span>
+                    </Col>
+                  </Row>
+                }
               </div>;
             }
           })()}

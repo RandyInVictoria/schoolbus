@@ -22,6 +22,7 @@ using Swashbuckle.SwaggerGen.Annotations;
 using SchoolBusAPI.Models;
 using SchoolBusAPI.ViewModels;
 using SchoolBusAPI.Services;
+using SchoolBusAPI.Authorization;
 
 namespace SchoolBusAPI.Controllers
 {
@@ -48,6 +49,7 @@ namespace SchoolBusAPI.Controllers
         [HttpPost]
         [Route("/api/schoolbusowners/bulk")]
         [SwaggerOperation("SchoolbusownersBulkPost")]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult SchoolbusownersBulkPost([FromBody]SchoolBusOwner[] items)
         {
             return this._service.SchoolbusownersBulkPostAsync(items);
@@ -108,6 +110,39 @@ namespace SchoolBusAPI.Controllers
         public virtual IActionResult SchoolbusownersIdGet([FromRoute]int id)
         {
             return this._service.SchoolbusownersIdGetAsync(id);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>Returns History for a particular SchoolBusOwner</remarks>
+        /// <param name="id">id of SchoolBusOwner to fetch History for</param>
+        /// <param name="offset">offset for records that are returned</param>
+        /// <param name="limit">limits the number of records returned.</param>
+        /// <response code="200">OK</response>
+        [HttpGet]
+        [Route("/api/schoolbusowners/{id}/history")]
+        [SwaggerOperation("SchoolbusownersIdHistoryGet")]
+        [SwaggerResponse(200, type: typeof(List<HistoryViewModel>))]
+        public virtual IActionResult SchoolbusownersIdHistoryGet([FromRoute]int id, [FromQuery]int? offset, [FromQuery]int? limit)
+        {
+            return this._service.SchoolbusownersIdHistoryGetAsync(id, offset, limit);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>Add a History record to the SchoolBus Owner</remarks>
+        /// <param name="id">id of SchoolBusOwner to add History for</param>
+        /// <param name="item"></param>
+        /// <response code="201">History created</response>
+        [HttpPost]
+        [Route("/api/schoolbusowners/{id}/history")]
+        [SwaggerOperation("SchoolbusownersIdHistoryPost")]
+        [SwaggerResponse(200, type: typeof(History))]
+        public virtual IActionResult SchoolbusownersIdHistoryPost([FromRoute]int id, [FromBody]History item)
+        {
+            return this._service.SchoolbusownersIdHistoryPostAsync(id, item);
         }
 
         /// <summary>

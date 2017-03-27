@@ -1,3 +1,102 @@
+  HistoryViewModel:
+    type: object
+    x-codegen-viewmodel: true
+    required:
+      - id      
+    properties:
+      id:
+        format: int32
+        type: integer
+        uniqueItems: true
+        description: A system-generated unique identifier for a History
+      historyText:
+        type: string
+        maxLength: 2048
+        description: The text of the history entry tracked against the related entity.
+      lastUpdateUserid:
+        type: string
+        description: Audit information - SM User Id for the User who most recently updated the record.
+      lastUpdateTimestamp:
+        type: string
+        format: date-time
+        description: Audit information - Timestamp for record modification       
+      affectedEntityId:
+        format: int32
+        type: integer
+        description: The primary key of the affected record        
+  AttachmentViewModel:
+    type: object
+    x-codegen-viewmodel: true
+    required:
+      - id      
+    properties:
+      id:
+        format: int32
+        type: integer
+        description: Primary Key
+      fileName:
+        type: string
+        maxLength: 2048
+        description: Filename as passed by the user uploading the file    
+      description:
+        type: string
+        maxLength: 2048
+        description: A note about the attachment,  optionally maintained by the user.
+      type:
+        type: string
+        maxLength: 255
+        description: Type of attachment
+  PermitViewModel:
+    type: object
+    x-codegen-viewmodel: true
+    properties:
+      permitNumber:
+        format: int32
+        type: integer        
+      permitIssueDate:
+        type: string
+      schoolBusOwnerName:
+        type: string
+      schoolBusOwnerAddressLine1:
+        type: string
+      schoolBusOwnerAddressLine2:
+        type: string
+      schoolBusMobilityAidCapacity:
+        type: string
+      schoolBusOwnerCity:
+        type: string
+      schoolBusOwnerProvince:
+        type: string
+      schoolBusOwnerPostalCode:
+        type: string        
+      icbcRegistrationNumber: 
+        type: string
+      vehicleIdentificationNumber:
+        type: string
+      icbcModelYear:
+        format: int32
+        type: integer
+      icbcMake:
+        type: string
+      restrictionsText:
+        type: string
+      schoolDistrictshortName:
+        type: string
+      schoolBusSeatingCapacity:
+        format: int32
+        type: integer
+      unitNumber:
+        type: string
+        maxLength: 30
+        description: The unit number of the Bus as defined by the School Bus owner - freeform text.     
+      permitClassCode:
+        type: string
+        maxLength: 50
+        description: The enumerated class of School Bus from drop down
+      bodyTypeCode:
+        type: string
+        maxLength: 50
+        description: The enumerated body type of the School Bus from drop down       
   SchoolBusOwnerViewModel:
     type: object
     x-codegen-viewmodel: true
@@ -52,6 +151,9 @@
         format: int32
         type: integer
         description: The number of buses for which this owner is associated with       
+      nextInspectionTypeCode:
+        type: string
+        description: Type Code for the Next InspectionType.  Null if there are no next inspections.
   UserViewModel:
     type: object
     x-codegen-viewmodel: true
@@ -70,28 +172,61 @@
         x-chance-type: name
       surname:
         type: string
-        x-chance-type: name
-      initials:
-        type: string
+        x-chance-type: name      
       email:
         type: string
         x-chance-type: email
       active:
         type: boolean
+      smUserId:
+        type: string
+      userRoles:
+        type: array
+        items:
+          $ref: '#/definitions/UserRole'
+      groupMemberships:
+        type: array
+        items:
+          $ref: '#/definitions/GroupMembership'
+      district:
+        $ref: '#/definitions/District'
+        description: The District to which this User is affliated.
   CurrentUserViewModel:
     type: object
     x-codegen-viewmodel: true
     properties:
+      id:
+        format: int32
+        type: integer
+        x-type-options:
+          min: 1
+          max: 1000
       givenName:
         type: string
         x-chance-type: name
       surname:
         type: string
-        x-chance-type: name
-      fullName:
+        x-chance-type: name      
+      email:
         type: string
-      districtName:
+        x-chance-type: email
+      active:
+        type: boolean
+      userRoles:
+        type: array
+        items:
+          $ref: '#/definitions/UserRole'
+      smUserId:
         type: string
+      smAuthorizationDirectory:
+        type: string
+      groupMemberships:
+        type: array
+        items:
+          $ref: '#/definitions/GroupMembership'
+      district:
+        $ref: '#/definitions/District'
+        description: The District to which this User is affliated.
       overdueInspections:
         format: int32
         type: integer
@@ -99,6 +234,9 @@
         format: int32
         type: integer
       dueNextMonthInspections:
+        format: int32
+        type: integer
+      reInspections:
         format: int32
         type: integer
   UserDetailsViewModel:
@@ -151,13 +289,13 @@
       expiryDate:
         type: string
         format: date-time
-      userId:
+      roleId:
         format: int32
         type: integer
         x-type-options:
           min: 1
           max: 1000
-      roleId:
+      userId:
         format: int32
         type: integer
         x-type-options:
@@ -216,6 +354,12 @@
       - name
       - description
     properties:
+      id:
+        format: int32
+        type: integer
+        x-type-options:
+          min: 1
+          max: 1000
       code:
         type: string
       name:
@@ -291,12 +435,9 @@
         x-chance-type: word
       isDefault:
         type: boolean
-      favouriteContextTypeId:
-        format: int32
-        type: integer
-        x-type-options:
-          min: 1
-          max: 1000
+      type:
+        type: string
+        description:  Type of favourite        
   NotificationViewModel:
     type: object
     x-codegen-viewmodel: true

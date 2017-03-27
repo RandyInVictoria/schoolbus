@@ -12,7 +12,6 @@ const DEFAULT_MODELS = {
   schoolBus: {},
   schoolBusAttachments: {},
   schoolBusCCW: {},
-  schoolBusHistories: {},
   schoolBusInspections: {},
   schoolBusNotes: {},
 
@@ -20,6 +19,12 @@ const DEFAULT_MODELS = {
 
   owners: {},
   owner: {},
+
+  roles: {},
+  role: {},
+  rolePermissions: {},
+
+  history: {},
 };
 
 export default function modelsReducer(state = DEFAULT_MODELS, action) {
@@ -75,9 +80,6 @@ export default function modelsReducer(state = DEFAULT_MODELS, action) {
     case Action.UPDATE_BUS_CCW:
       return { ...state, schoolBusCCW: action.schoolBusCCW };
 
-    case Action.UPDATE_BUS_HISTORIES:
-      return { ...state, schoolBusHistories: action.schoolBusHistories };
-
     case Action.UPDATE_BUS_INSPECTIONS:
       return { ...state, schoolBusInspections: action.schoolBusInspections };
 
@@ -106,6 +108,26 @@ export default function modelsReducer(state = DEFAULT_MODELS, action) {
 
     case Action.DELETE_OWNER:
       return { ...state, owner: action.owner };
+
+    // Roles/Permissions
+    case Action.UPDATE_ROLES:
+      return { ...state, roles: action.roles };
+
+    case Action.ADD_ROLE:
+      return { ...state, role: action.role };
+
+    case Action.UPDATE_ROLE:
+      return { ...state, role: action.role };
+
+    case Action.DELETE_ROLE:
+      return { ...state, role: action.role };
+
+    case Action.UPDATE_ROLE_PERMISSIONS:
+      return { ...state, rolePermissions: action.rolePermissions };
+
+      // History
+    case Action.UPDATE_HISTORY:
+      return { ...state, history: action.history };
   }
 
   return state;

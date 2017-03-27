@@ -19,6 +19,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using SchoolBusAPI.Models;
 
 namespace SchoolBusAPI.Models
 {
@@ -27,7 +28,7 @@ namespace SchoolBusAPI.Models
     /// </summary>
         [MetaDataExtension (Description = "Users associated with specific notifications, created at the time the notification record is created because of the user&amp;#39;s business relationship to the bus - e.g. the user is the currently assigned inspector, or the user is the manager for the District in which the bus is located. The rules for linking a user to a notification for a specific bus could vary over time based on the needs of the business. At minimum, it is expected the current inspector assigned to a bus will be notified of every notification for that bus.")]
 
-    public partial class Notification : IEquatable<Notification>
+    public partial class Notification : AuditableEntity, IEquatable<Notification>
     {
         /// <summary>
         /// Default constructor, required by entity framework
@@ -41,14 +42,14 @@ namespace SchoolBusAPI.Models
         /// Initializes a new instance of the <see cref="Notification" /> class.
         /// </summary>
         /// <param name="Id">A system-generated unique identifier for a Notification (required).</param>
-        /// <param name="Event">Event.</param>
-        /// <param name="Event2">Event2.</param>
+        /// <param name="Event">A foreign key reference to the system-generated unique identifier for a Notification Event.</param>
+        /// <param name="Event2">A foreign key reference to the system-generated unique identifier for a Notification Event.</param>
         /// <param name="HasBeenViewed">True if the user linked to the inspection has read the notification.</param>
         /// <param name="IsWatchNotification">TO BE REMOVED.</param>
         /// <param name="IsExpired">TO BE REMOVED.</param>
         /// <param name="IsAllDay">TO BE REMOVED.</param>
         /// <param name="PriorityCode">TO BE REMOVED.</param>
-        /// <param name="User">User.</param>
+        /// <param name="User">A foreign key reference to the system-generated unique identifier for a User.</param>
         public Notification(int Id, NotificationEvent Event = null, NotificationEvent Event2 = null, bool? HasBeenViewed = null, bool? IsWatchNotification = null, bool? IsExpired = null, bool? IsAllDay = null, string PriorityCode = null, User User = null)
         {   
             this.Id = Id;
@@ -70,26 +71,34 @@ namespace SchoolBusAPI.Models
         public int Id { get; set; }
         
         /// <summary>
-        /// Gets or Sets Event
+        /// A foreign key reference to the system-generated unique identifier for a Notification Event
         /// </summary>
+        /// <value>A foreign key reference to the system-generated unique identifier for a Notification Event</value>
+        [MetaDataExtension (Description = "A foreign key reference to the system-generated unique identifier for a Notification Event")]
         public NotificationEvent Event { get; set; }
         
         /// <summary>
         /// Foreign key for Event 
-        /// </summary>       
+        /// </summary>   
         [ForeignKey("Event")]
-        public int? EventRefId { get; set; }
+		[JsonIgnore]
+		[MetaDataExtension (Description = "A foreign key reference to the system-generated unique identifier for a Notification Event")]
+        public int? EventId { get; set; }
         
         /// <summary>
-        /// Gets or Sets Event2
+        /// A foreign key reference to the system-generated unique identifier for a Notification Event
         /// </summary>
+        /// <value>A foreign key reference to the system-generated unique identifier for a Notification Event</value>
+        [MetaDataExtension (Description = "A foreign key reference to the system-generated unique identifier for a Notification Event")]
         public NotificationEvent Event2 { get; set; }
         
         /// <summary>
         /// Foreign key for Event2 
-        /// </summary>       
+        /// </summary>   
         [ForeignKey("Event2")]
-        public int? Event2RefId { get; set; }
+		[JsonIgnore]
+		[MetaDataExtension (Description = "A foreign key reference to the system-generated unique identifier for a Notification Event")]
+        public int? Event2Id { get; set; }
         
         /// <summary>
         /// True if the user linked to the inspection has read the notification
@@ -129,15 +138,19 @@ namespace SchoolBusAPI.Models
         public string PriorityCode { get; set; }
         
         /// <summary>
-        /// Gets or Sets User
+        /// A foreign key reference to the system-generated unique identifier for a User
         /// </summary>
+        /// <value>A foreign key reference to the system-generated unique identifier for a User</value>
+        [MetaDataExtension (Description = "A foreign key reference to the system-generated unique identifier for a User")]
         public User User { get; set; }
         
         /// <summary>
         /// Foreign key for User 
-        /// </summary>       
+        /// </summary>   
         [ForeignKey("User")]
-        public int? UserRefId { get; set; }
+		[JsonIgnore]
+		[MetaDataExtension (Description = "A foreign key reference to the system-generated unique identifier for a User")]
+        public int? UserId { get; set; }
         
         /// <summary>
         /// Returns the string presentation of the object

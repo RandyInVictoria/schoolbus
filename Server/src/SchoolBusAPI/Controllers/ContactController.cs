@@ -22,6 +22,7 @@ using Swashbuckle.SwaggerGen.Annotations;
 using SchoolBusAPI.Models;
 using SchoolBusAPI.ViewModels;
 using SchoolBusAPI.Services;
+using SchoolBusAPI.Authorization;
 
 namespace SchoolBusAPI.Controllers
 {
@@ -48,6 +49,7 @@ namespace SchoolBusAPI.Controllers
         [HttpPost]
         [Route("/api/contacts/bulk")]
         [SwaggerOperation("ContactsBulkPost")]
+        [RequiresPermission(Permission.ADMIN)]
         public virtual IActionResult ContactsBulkPost([FromBody]Contact[] items)
         {
             return this._service.ContactsBulkPostAsync(items);
@@ -64,36 +66,6 @@ namespace SchoolBusAPI.Controllers
         public virtual IActionResult ContactsGet()
         {
             return this._service.ContactsGetAsync();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <remarks>Returns address contacts for a particular SchoolBusOwner</remarks>
-        /// <param name="id">id of SchoolBusOwner to fetch contact address for</param>
-        /// <response code="200">OK</response>
-        [HttpGet]
-        [Route("/api/contacts/{id}/contactaddresses")]
-        [SwaggerOperation("ContactsIdContactaddressesGet")]
-        [SwaggerResponse(200, type: typeof(List<ContactAddress>))]
-        public virtual IActionResult ContactsIdContactaddressesGet([FromRoute]int id)
-        {
-            return this._service.ContactsIdContactaddressesGetAsync(id);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <remarks>Returns phone contacts for a particular SchoolBusOwner</remarks>
-        /// <param name="id">id of SchoolBusOwner to fetch contact phone for</param>
-        /// <response code="200">OK</response>
-        [HttpGet]
-        [Route("/api/contacts/{id}/contactphones")]
-        [SwaggerOperation("ContactsIdContactphonesGet")]
-        [SwaggerResponse(200, type: typeof(List<ContactPhone>))]
-        public virtual IActionResult ContactsIdContactphonesGet([FromRoute]int id)
-        {
-            return this._service.ContactsIdContactphonesGetAsync(id);
         }
 
         /// <summary>

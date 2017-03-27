@@ -28,11 +28,10 @@
 
   #owners-faves {
     float: right;
-    margin-top: 10px;
   }
 
-  #owners-faves-dropdown {
-    width: 79px;
+  .alert .btn {
+    float: right;
   }
 }
 
@@ -57,6 +56,10 @@
 
   .btn {
     margin-left: 20px;
+  }
+
+  .col-display-label {
+    width: 170px;
   }
 
   h1 {

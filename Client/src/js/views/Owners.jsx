@@ -2,9 +2,8 @@ import React from 'react';
 
 import { connect } from 'react-redux';
 
-import { Well, Alert, Row, Col } from 'react-bootstrap';
+import { PageHeader, Well, Alert, Row, Col } from 'react-bootstrap';
 import { ButtonToolbar, Button, ButtonGroup, Glyphicon } from 'react-bootstrap';
-import { LinkContainer } from 'react-router-bootstrap';
 
 import _ from 'lodash';
 import Promise from 'bluebird';
@@ -18,26 +17,17 @@ import store from '../store';
 
 import BadgeLabel from '../components/BadgeLabel.jsx';
 import CheckboxControl from '../components/CheckboxControl.jsx';
-import Confirm from '../components/Confirm.jsx';
+import DeleteButton from '../components/DeleteButton.jsx';
+import EditButton from '../components/EditButton.jsx';
 import Favourites from '../components/Favourites.jsx';
 import FilterDropdown from '../components/FilterDropdown.jsx';
 import MultiDropdown from '../components/MultiDropdown.jsx';
-import OverlayTrigger from '../components/OverlayTrigger.jsx';
 import SortTable from '../components/SortTable.jsx';
 import Spinner from '../components/Spinner.jsx';
+import Unimplemented from '../components/Unimplemented.jsx';
 
 import { formatDateTime } from '../utils/date';
 
-/*
-
-Default search rules:
-  Set the "Inspector" field if the user is an inspector
-  Set the "District" field if the user is NOT an inspector to the users home district
-
-TODO:
-* Print / Email
-
-*/
 
 var Owners = React.createClass({
   propTypes: {
@@ -109,13 +99,15 @@ var Owners = React.createClass({
           return;
         }
       }
-      this.fetch();
+      return this.fetch();
+    }).finally(() => {
+      this.setState({ loading: false });
     });
   },
 
   fetch() {
     this.setState({ loading: true });
-    Api.searchOwners(this.buildSearchParams()).finally(() => {
+    return Api.searchOwners(this.buildSearchParams()).finally(() => {
       this.setState({ loading: false });
     });
   },
@@ -150,8 +142,9 @@ var Owners = React.createClass({
     Api.addOwner(owner).then(() => {
       // Open it up
       this.props.router.push({
-        pathname: `owners/${ this.props.owner.id }`,
+        pathname: `${ Constant.OWNERS_PATHNAME }/${ this.props.owner.id }`,
       });
+      History.logNewOwner(this.props.owner);
     });
   },
 
@@ -174,39 +167,49 @@ var Owners = React.createClass({
     var inspectors = _.sortBy(this.props.inspectors, 'name');
     var owners = _.sortBy(this.props.owners, 'name');
 
+    var numOwners = this.state.loading ? '...' : Object.keys(this.props.ownerList).length;
+
     return <div id="owners-list">
+      <PageHeader>Owners ({ numOwners })
+        <ButtonGroup id="owners-buttons">
+          <Unimplemented>
+            <Button onClick={ this.email }><Glyphicon glyph="envelope" title="E-mail" /></Button>
+          </Unimplemented>
+          <Unimplemented>
+            <Button onClick={ this.print }><Glyphicon glyph="print" title="Print" /></Button>
+          </Unimplemented>
+        </ButtonGroup>
+      </PageHeader>
       <div>
         <Well id="owners-bar" bsSize="small" className="clearfix">
           <Row>
             <Col md={10}>
               <ButtonToolbar id="owners-search">
                 <MultiDropdown id="selectedDistrictsIds" placeholder="Districts"
-                  items={ districts } selectedIds={ this.state.search.selectedDistrictsIds } updateState={ this.updateSearchState } showMaxItems={ 2 } />
+                  items={ districts } selectedIds={ this.state.search.selectedDistrictsIds } updateState={ this.updateSearchState } showMaxItems={ 2 }/>
                 <MultiDropdown id="selectedInspectorsIds" placeholder="Inspectors"
-                  items={ inspectors } selectedIds={ this.state.search.selectedInspectorsIds } updateState={ this.updateSearchState } showMaxItems={ 2 } />
-                <FilterDropdown id="ownerId" placeholder="Owner" blankLine
-                  items={ owners } selectedId={ this.state.search.ownerId } updateState={ this.updateSearchState } />
+                  items={ inspectors } selectedIds={ this.state.search.selectedInspectorsIds } updateState={ this.updateSearchState } showMaxItems={ 2 }/>
+                <FilterDropdown id="ownerId" placeholder="Owner" blankLine="(All)"
+                  items={ owners } selectedId={ this.state.search.ownerId } updateState={ this.updateSearchState }/>
                 <CheckboxControl inline id="hideInactive" checked={ this.state.search.hideInactive } updateState={ this.updateSearchState }>Hide Inactive</CheckboxControl>
                 <Button id="search-button" bsStyle="primary" onClick={ this.fetch }>Search</Button>
               </ButtonToolbar>
             </Col>
-            <Col md={1}>
-              <Favourites id="owners-faves-dropdown" type="owner" favourites={ this.props.favourites } data={ this.state.search } onSelect={ this.loadFavourite } />
-            </Col>
-            <Col md={1}>
-              <div id="owners-buttons">
-                <ButtonGroup>
-                  <Button onClick={ this.email }><Glyphicon glyph="envelope" title="E-mail" /></Button>
-                  <Button onClick={ this.print }><Glyphicon glyph="print" title="Print" /></Button>
-                </ButtonGroup>
-              </div>
+            <Col md={2}>
+              <Row id="owners-faves">
+                <Favourites id="owners-faves-dropdown" type="owner" favourites={ this.props.favourites } data={ this.state.search } onSelect={ this.loadFavourite } pullRight/>
+              </Row>
             </Col>
           </Row>
         </Well>
 
         {(() => {
           if (this.state.loading) { return <div style={{ textAlign: 'center' }}><Spinner/></div>; }
-          if (Object.keys(this.props.ownerList).length === 0) { return <Alert bsStyle="success">No owners</Alert>; }
+
+          var addOwnerButton = <Button title="Add Owner" bsSize="xsmall" onClick={ this.openAddDialog }><Glyphicon glyph="plus" />&nbsp;<strong>Add Owner</strong></Button>;
+          if (Object.keys(this.props.ownerList).length === 0) {
+            return <Alert bsStyle="success">No owners { addOwnerButton }</Alert>;
+          }
 
           var ownerList = _.sortBy(this.props.ownerList, this.state.ui.sortField);
           if (this.state.ui.sortDesc) {
@@ -219,29 +222,25 @@ var Owners = React.createClass({
             { field: 'numberOfBuses',          title: 'School Buses',    style: { textAlign: 'center' } },
             { field: 'nextInspectionDateSort', title: 'Next Inspection' },
             { field: 'addOwner',               title: 'Add Owner',       style: { textAlign: 'right'  },
-              node: <Button title="add" bsSize="xsmall" onClick={ this.openAddDialog }><Glyphicon glyph="plus" />&nbsp;<strong>Add Owner</strong></Button>,
+              node: addOwnerButton,
             },
           ]}>
             {
               _.map(ownerList, (owner) => {
                 return <tr key={ owner.id } className={ owner.isActive ? null : 'info' }>
-                  <td>{ owner.name }</td>
+                  <td>{ owner.canView ? <a href={ owner.url }>{ owner.name }</a> : owner.name }</td>
                   <td>{ owner.primaryContactName }</td>
                   <td style={{ textAlign: 'center' }}>
-                    <a href={ `#school-buses?${ Constant.SCHOOL_BUS_OWNER_QUERY }=${ owner.id }` }>{ owner.numberOfBuses }</a>
+                    <a href={ `#/${ Constant.BUSES_PATHNAME }?${ Constant.SCHOOL_BUS_OWNER_QUERY }=${ owner.id }` }>{ owner.numberOfBuses }</a>
                   </td>
-                  <td>{ formatDateTime(owner.nextInspectionDate, 'MM/DD/YYYY') }
+                  <td>{ formatDateTime(owner.nextInspectionDate, Constant.DATE_SHORT_MONTH_DAY_YEAR) }
                     { owner.isReinspection ? <BadgeLabel bsStyle="info">R</BadgeLabel> : null }
                     { owner.isOverdue ? <BadgeLabel bsStyle="danger">!</BadgeLabel> : null }
                   </td>
                   <td style={{ textAlign: 'right' }}>
                     <ButtonGroup>
-                      <OverlayTrigger trigger="click" placement="top" rootClose overlay={ <Confirm onConfirm={ this.delete.bind(this, owner) }/> }>
-                        <Button className={ owner.canDelete ? '' : 'hidden' } title="deleteOwner" bsSize="xsmall"><Glyphicon glyph="trash" /></Button>
-                      </OverlayTrigger>
-                      <LinkContainer to={{ pathname: 'owners/' + owner.id }}>
-                        <Button className={ owner.canEdit ? '' : 'hidden' } title="editOwner" bsSize="xsmall"><Glyphicon glyph="edit" /></Button>
-                      </LinkContainer>
+                      <DeleteButton name="Owner" hide={ !owner.canDelete } onConfirm={ this.delete.bind(this, owner) }/>
+                      <EditButton name="Owner" hide={ !owner.canView } view pathname={ `${ Constant.OWNERS_PATHNAME }/${ owner.id }` }/>
                     </ButtonGroup>
                   </td>
                 </tr>;
