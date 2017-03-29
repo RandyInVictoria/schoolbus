@@ -67,10 +67,14 @@ export function request(path, options) {
   options = options || {};
 
   var xhr = new XMLHttpRequest();
-  var contentTypeHeader = options.files ? 'multipart/form-data' : 'application/x-www-form-urlencoded';
-  options.headers = Object.assign({
-    'Content-Type': contentTypeHeader,
-  }, options.headers || {});
+
+  if (!options.headers) { options.headers = {}; }
+  if (!options.files) {
+    options.headers = Object.assign({
+      'Content-Type': 'application/x-www-form-urlencoded',
+    }, options.headers);
+  }
+
   var method = (options.method || 'GET').toUpperCase();
 
   if(options.onUploadProgress) {
